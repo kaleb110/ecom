@@ -15,9 +15,8 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Only fetch cart items once user is loaded and user.id is available
     if (isLoaded && user) {
-      fetchCartItems(user.id);
+      fetchCartItems(user.id); // Fetch cart items for the logged-in user
     }
   }, [fetchCartItems, isLoaded, user]);
 
@@ -27,11 +26,15 @@ const CheckoutPage = () => {
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           userId: user.id,
           cartItems,
         }),
       });
+      if (!response.ok) throw new Error("Failed to initiate checkout");
       const session = await response.json();
       router.push(session.url);
     } catch (error) {
@@ -72,7 +75,7 @@ const CheckoutPage = () => {
       {/* Total Price */}
       <div className="mt-4">
         <h2 className="text-xl font-bold">
-          Total: ${calculateTotalPrice().toFixed(2)}
+          Total: ${calculateTotalPrice(cartItems).toFixed(2)}
         </h2>
       </div>
 

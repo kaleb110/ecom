@@ -10,8 +10,10 @@ import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { useUser } from "@clerk/nextjs"; // Import useUser from Clerk
 
 const ProductDetailsComponent = () => {
+  const { user } = useUser(); // Access current user
   const {
     fetchProductDetail,
     isLoading,
@@ -29,12 +31,21 @@ const ProductDetailsComponent = () => {
     fetchProductDetail(id);
   }, [fetchProductDetail, id]);
 
-  // Replace this with your actual user ID
-  const userId = 1; // Set your logged-in user's ID here
+  // Use Clerk's user ID
+  const clerkUserId = user?.id; // Get user ID from Clerk
 
   const handleAddCartButton = () => {
+    if (!clerkUserId) {
+      toast({
+        title: "Error",
+        description: "User not logged in",
+        duration: 3000,
+      });
+      return;
+    }
+
     // Optimistically add to cart
-    addToCartOptimistic(userId, productDetail.id, quantity);
+    addToCartOptimistic(clerkUserId, productDetail.id, quantity);
 
     // Display the toast notification
     toast({
@@ -71,8 +82,7 @@ const ProductDetailsComponent = () => {
   if (isLoading) return <LoadingSkeleton />;
   if (!productDetail) return <p>No Product</p>;
 
-  const { name, description, price, stock, imageUrl } = productDetail;
-  const category = "car";
+  const { name, description, price, stock, imageUrl, categories } = productDetail;
 
   // Function to increase quantity
   const increaseQuantity = () => {
@@ -103,11 +113,18 @@ const ProductDetailsComponent = () => {
         <div className="space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">{name}</h1>
-            {category && (
-              <Badge variant="secondary" className="text-sm">
-                {category}
-              </Badge>
-            )}
+            <div className="flex gap-3">
+              {categories.length > 0 ?
+                categories.map((category) => (
+                  <Badge
+                    key={category.name}
+                    variant="secondary"
+                    className="text-sm"
+                  >
+                    {category.name}
+                  </Badge>
+                )): "unknown"}
+            </div>
           </div>
           <div className="text-4xl font-bold">${price.toFixed(2)}</div>
           <p className="text-gray-500">{description}</p>

@@ -5,10 +5,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, ShoppingCart, Loader2 } from "lucide-react";
+import { Star, ShoppingCart } from "lucide-react";
 import useProductStore from "@/utils/zustand";
 
 export function ProductCardComponent() {
@@ -16,7 +22,7 @@ export function ProductCardComponent() {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -52,19 +58,17 @@ export function ProductCardComponent() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
       {products.map((product) => {
-        const { id, name, price, description, imageUrl } = product;
-        const productId = id.toString();
-        const rating = 4; // Assuming a fixed rating for now
-        const category = "car"; // Assuming a fixed category for now
+        const { id, name, price, description, imageUrl, categories } = product;
+        const rating = product.rating || 4; // Default rating if not provided
 
         return (
           <motion.div
-            key={productId}
+            key={id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Link href={`/products/${productId}`}>
+            <Link href={`/products/${id}`}>
               <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105">
                 <div className="relative aspect-w-16 aspect-h-9">
                   <Image
@@ -75,16 +79,32 @@ export function ProductCardComponent() {
                     width={400}
                     height={400}
                   />
-                  <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-                    {category}
-                  </Badge>
+                  {/* Display Categories as Badges */}
+                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                    {categories.length > 0 ? (
+                      categories.map((category) => (
+                        <Badge
+                          key={category.id}
+                          className="bg-primary text-primary-foreground"
+                        >
+                          {category.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge className="bg-gray-500 text-white">Unknown</Badge>
+                    )}
+                  </div>
                 </div>
                 <CardHeader className="p-4">
-                  <CardTitle className="text-lg font-semibold line-clamp-1">{name}</CardTitle>
+                  <CardTitle className="text-lg font-semibold line-clamp-1">
+                    {name}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <div className="text-2xl font-bold text-primary">${price.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      ${price.toFixed(2)}
+                    </div>
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
                         <Star
@@ -101,7 +121,9 @@ export function ProductCardComponent() {
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{description}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                    {description}
+                  </p>
                 </CardContent>
                 <CardFooter className="p-4">
                   <Button className="w-full" size="sm">

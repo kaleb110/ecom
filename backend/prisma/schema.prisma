@@ -8,32 +8,16 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  clerkUserId   String   @unique
+  name          String
+  email         String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relationships
-  orders    Order[]
-  cart      Cart?
-}
-
-model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
-  stock       Int
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relationships
-  categories  ProductCategory[] 
-  cartItems   CartItem[] 
-  orders      OrderItem[]
+  orders        Order[]
+  cart          Cart?
 }
 
 model Cart {
@@ -45,8 +29,6 @@ model Cart {
   user      User     @relation(fields: [userId], references: [id])
 
   items     CartItem[] 
-  // Consider adding a total field if you want to store the cart total directly
-  // total    Float?
 }
 
 model CartItem {
@@ -58,7 +40,6 @@ model CartItem {
   cart      Cart     @relation(fields: [cartId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
 
-  // Ensure the combination of cartId and productId is unique
   @@unique([cartId, productId])
 }
 
@@ -83,6 +64,21 @@ model OrderItem {
 
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  stock       Int
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categories  ProductCategory[] 
+  cartItems   CartItem[] 
+  orders      OrderItem[]
 }
 
 model ProductCategory {

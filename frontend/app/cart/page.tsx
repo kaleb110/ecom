@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect } from "react";
 import {
   Sheet,
@@ -17,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import useProductStore from "@/utils/zustand";
 import Image from "next/image";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 const Cart = () => {
   const {
@@ -26,35 +25,35 @@ const Cart = () => {
     removeFromCartOptimistic,
   } = useProductStore();
 
-  useEffect(() => {
-    fetchCartItems(1); // Fetch cart items for user with ID 1 (you can change this based on your user system)
-  }, [fetchCartItems]);
+  const { user, isLoaded } = useUser(); // Clerk provides `isLoaded` to check if the user data is ready
 
-  const cartArray = Array.isArray(cartItems?.items) ? cartItems.items : [];
+  useEffect(() => {
+    // Ensure that `user` is available and `user.id` exists before calling fetchCartItems
+    if (isLoaded && user) {
+      fetchCartItems(user.id);
+    }
+  }, [isLoaded, user, fetchCartItems]);
+
+  const cartArray = Array.isArray(cartItems) ? cartItems : [];
 
   const totalItems = cartArray.reduce((sum, item) => sum + item.quantity, 0);
-
   const totalPrice = cartArray.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
 
-  const updateQuantityOptimistic = (id: number, newQuantity: number) => {
-    const cartItem = cartArray.find((item) => item.id === id);
-    if (cartItem) {
-      updateCartItemOptimistic(
-        cartItem.cartId,
-        cartItem.productId,
-        newQuantity
-      );
-    }
+  const updateQuantityOptimistic = (
+    cartId: string,
+    productId: number,
+    newQuantity: number
+  ) => {
+    if (newQuantity < 1) return; // Ensure quantity is not below 1
+
+    updateCartItemOptimistic(cartId, productId, newQuantity);
   };
 
-  const handleRemoveItemOptimistic = (id: number) => {
-    const cartItem = cartArray.find((item) => item.id === id);
-    if (cartItem) {
-      removeFromCartOptimistic(cartItem.cartId, cartItem.productId);
-    }
+  const handleRemoveItemOptimistic = (cartId: number, productId: number) => {
+    removeFromCartOptimistic(cartId, productId);
   };
 
   return (
@@ -101,7 +100,7 @@ const Cart = () => {
                         {item.product.name}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        ${item.product.price.toFixed(2)}
+                        ${item.product.price?.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -112,8 +111,13 @@ const Cart = () => {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() =>
-                          updateQuantityOptimistic(item.id, item.quantity - 1)
+                          updateQuantityOptimistic(
+                            item.cartId,
+                            item.productId,
+                            item.quantity - 1
+                          )
                         }
+                        disabled={item.quantity === 1} // Disable if quantity is 1
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -125,7 +129,11 @@ const Cart = () => {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() =>
-                          updateQuantityOptimistic(item.id, item.quantity + 1)
+                          updateQuantityOptimistic(
+                            item.cartId,
+                            item.productId,
+                            item.quantity + 1
+                          )
                         }
                       >
                         <Plus className="h-3 w-3" />
@@ -135,7 +143,9 @@ const Cart = () => {
                       variant="ghost"
                       size="sm"
                       className="h-8 px-2"
-                      onClick={() => handleRemoveItemOptimistic(item.id)}
+                      onClick={() =>
+                        handleRemoveItemOptimistic(item.cartId, item.productId)
+                      }
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Remove

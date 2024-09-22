@@ -3,22 +3,58 @@ import axios from "axios";
 
 const useProductStore = create((set) => ({
   // Store State
+  user: null, // authticated user
   products: [], // Stores the product list
   cartItems: [], // Stores the cart items
   productDetail: null, // Stores the detailed product data
   isLoading: false, // Loading state for async operations
   error: null, // Error state to capture errors
 
-  // Fetch all products
-  fetchProducts: async () => {
-    set({ isLoading: true, error: null }); // Set loading state
+  signInUser: async (clerkUserId, email, name) => {
+    set({ isLoading: true });
+
     try {
-      const response = await axios.get("http://localhost:5000/products");
-      set({ products: response.data, isLoading: false }); // Update products and reset loading state
+      // Sync the user with the backend
+      const response = await axios.post("http://localhost:5000/signin", {
+        clerkUserId,
+        email,
+        name,
+      });
+
+      // Store the user data in Zustand state
+      set({ user: response.data, isLoading: false });
     } catch (error) {
-      set({ error: "Failed to fetch products", isLoading: false }); // Handle error
+      console.error(
+        "Error syncing user:",
+        error.response?.data || error.message
+      );
+      set({ error: "Failed to sync user", isLoading: false });
     }
   },
+
+  // Fetch all products
+  fetchProducts: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await axios.get("http://localhost:5000/products"); // Update with your API endpoint
+      set({ products: response.data, isLoading: false });
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      set({ error: "Failed to fetch products", isLoading: false });
+    }
+  },
+
+  // handleCheckout: async () => {
+  //   set({ isLoading: true });
+
+  //   try {
+  //     const response = axios.post("http://localhost:5000/api/checkout");
+  //     set({})
+  //   } catch (error) {
+  //     console.error("Error handling checkout")
+  //     set({error: "Failed to handle checkout!"})
+  //   }
+  // },
 
   // Fetch product details for a single product by ID
   fetchProductDetail: async (id: string) => {
@@ -31,25 +67,38 @@ const useProductStore = create((set) => ({
     }
   },
 
-  // Fetch cart items for a specific user
-  fetchCartItems: async (userId) => {
+  fetchCartItems: async (clerkUserId: string) => {
     set({ isLoading: true, error: null });
+
+    if (!clerkUserId) {
+      set({ error: "No clerkUserId provided", isLoading: false });
+      return;
+    }
+
     try {
-      const response = await axios.get(`http://localhost:5000/cart/${userId}`);
-      set({ cartItems: response.data, isLoading: false });
+      const response = await axios.get(
+        `http://localhost:5000/cart/${clerkUserId}`
+      );
+
+      // Validate the response format to avoid potential issues
+      if (response.data && response.data.items) {
+        set({ cartItems: response.data.items, isLoading: false });
+      } else {
+        set({ cartItems: [], isLoading: false });
+      }
     } catch (error) {
+      console.error("Error fetching cart items:", error);
       set({ error: "Failed to fetch cart items!", isLoading: false });
     }
   },
 
   // Add a product to the cart
-  addToCartOptimistic: (userId, productId, quantity) => {
+  addToCartOptimistic: (clerkUserId, productId, quantity) => {
     set((state) => ({
-      // Ensure we spread the existing cartItems array
       cartItems: [
-        ...(Array.isArray(state.cartItems) ? state.cartItems : []), // Ensure cartItems is always an array
+        ...(Array.isArray(state.cartItems) ? state.cartItems : []),
         {
-          id: productId,
+          id: `${clerkUserId}-${productId}`, // Unique ID for the cart item
           quantity,
           product: { id: productId }, // Simplified product structure
         },
@@ -59,13 +108,13 @@ const useProductStore = create((set) => ({
     // Send the API request to persist the cart addition
     axios
       .post(`http://localhost:5000/cart/items`, {
-        userId,
+        clerkUserId,
         productId,
         quantity,
       })
       .catch((error) => {
         console.error("Failed to add item to cart:", error);
-        // Optionally, you can implement rollback logic here
+        // Optionally, implement rollback logic here
       });
   },
 
@@ -78,48 +127,42 @@ const useProductStore = create((set) => ({
   },
 
   // Optimistically update cart item quantity
-  updateCartItemOptimistic: (cartId, productId, newQuantity) => {
-    // Update cart items immediately in state
+  updateCartItemOptimistic: (cartId, productId, quantity) => {
+    // Update cart items immediately in state (Optimistic Update)
     set((state) => ({
-      cartItems: {
-        ...state.cartItems,
-        items: state.cartItems.items.map((item) =>
-          item.cartId === cartId && item.productId === productId
-            ? { ...item, quantity: newQuantity }
-            : item
-        ),
-      },
+      cartItems: state.cartItems.map((item) =>
+        item.product.id === productId ? { ...item, quantity: quantity } : item
+      ),
     }));
 
     // Make API call to persist the update
     axios
       .put(`http://localhost:5000/cart/items`, {
-        userId: cartId,
+        cartId, // cartId should represent the cart's user or the cart itself
         productId,
-        quantity: newQuantity,
+        quantity,
       })
-      .catch(() => {
-        // Optionally handle failure and rollback the optimistic update
+      .catch((error) => {
+        console.error("Failed to update cart item:", error);
+        // Optionally handle failure and rollback the optimistic update here
       });
   },
 
   // Optimistically remove an item from the cart
-  removeFromCartOptimistic: (cartId, productId) => {
+  removeFromCartOptimistic: (cartId: number, productId: number) => {
     // Optimistically remove the item from the state first
     set((state) => ({
-      cartItems: {
-        ...state.cartItems,
-        items: state.cartItems.items.filter(
-          (item) => item.cartId !== cartId || item.productId !== productId
-        ),
-      },
+      cartItems: state.cartItems.filter(
+        (item) => item.product.id !== productId
+      ),
     }));
 
     // Make the API call to remove the item from the server
     axios
       .delete(`http://localhost:5000/cart/items/${cartId}/${productId}`)
-      .catch(() => {
-        // Optionally handle failure and rollback the optimistic removal
+      .catch((error) => {
+        console.error("Failed to remove item from cart:", error);
+        // Optionally handle failure and rollback the optimistic removal here
       });
   },
 }));

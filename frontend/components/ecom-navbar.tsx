@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Cart from "@/app/cart/page";
 import { cn } from "@/lib/utils";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-
+import useProductStore from "@/utils/zustand";
+import { useUser } from "@clerk/nextjs";
 const categories = [
   { value: "all", label: "All Categories" },
   { value: "electronics", label: "Electronics" },
@@ -25,8 +26,41 @@ const categories = [
 ];
 
 export function EcomNavbarComponent() {
+  const { signInUser, user: storedUser } = useProductStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const { user, isLoaded } = useUser(); // Now this hook is inside a valid React component
+  console.log(user);
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      const clerkUserId = user.id; // Clerk user ID
+
+      // Extract email, prioritizing primaryEmailAddress and fallback to others if necessary
+      let email = user.primaryEmailAddress?.emailAddress || null;
+      if (!email && user.emailAddresses?.length > 0) {
+        email = user.emailAddresses[0]?.emailAddress;
+      }
+
+      // Extract name, fallback to "Unknown User" if not available
+      let name =
+        user.fullName ||
+        `${user.firstName || ""} ${user.lastName || ""}`.trim();
+      if (!name || name.length === 0) {
+        console.warn("No name provided. Using 'Unknown User' as a fallback.");
+        name = "Unknown User";
+      }
+
+      // Proceed only if we have a valid email
+      if (!email || typeof email !== "string") {
+        console.error("Invalid email:", email);
+        return;
+      }
+
+      // Sync user with the backend
+      signInUser(clerkUserId, email, name);
+    }
+  }, [user, isLoaded]);
 
   return (
     <nav className="bg-white shadow sticky top-0 z-50">
