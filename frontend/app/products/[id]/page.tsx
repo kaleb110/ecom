@@ -10,10 +10,11 @@ import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { useUser } from "@clerk/nextjs"; // Import useUser from Clerk
+import { useUser } from "@clerk/nextjs";
+// import { EcomNavbarComponent } from "@/components/ecom-navbar";
 
 const ProductDetailsComponent = () => {
-  const { user } = useUser(); // Access current user
+  const { user } = useUser();
   const {
     fetchProductDetail,
     isLoading,
@@ -45,7 +46,7 @@ const ProductDetailsComponent = () => {
     }
 
     // Optimistically add to cart
-    addToCartOptimistic(clerkUserId, productDetail.id, quantity);
+    addToCartOptimistic(clerkUserId, productDetail?.id, quantity);
 
     // Display the toast notification
     toast({
@@ -82,7 +83,8 @@ const ProductDetailsComponent = () => {
   if (isLoading) return <LoadingSkeleton />;
   if (!productDetail) return <p>No Product</p>;
 
-  const { name, description, price, stock, imageUrl, categories } = productDetail;
+  const { name, description, price, stock, imageUrl, categories } =
+    productDetail;
 
   // Function to increase quantity
   const increaseQuantity = () => {
@@ -97,77 +99,81 @@ const ProductDetailsComponent = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100">
-            <Image
-              src={imageUrl}
-              alt={name}
-              className="object-cover w-full h-full"
-              width={1200}
-              height={400}
-            />
-          </div>
-        </div>
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{name}</h1>
-            <div className="flex gap-3">
-              {categories.length > 0 ?
-                categories.map((category) => (
-                  <Badge
-                    key={category.name}
-                    variant="secondary"
-                    className="text-sm"
-                  >
-                    {category.name}
-                  </Badge>
-                )): "unknown"}
+    <div className="flex flex-col gap-5">
+      {/* <EcomNavbarComponent /> */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100">
+              <Image
+                src={imageUrl || ""}
+                alt={name}
+                className="object-cover w-full h-full"
+                width={1200}
+                height={400}
+              />
             </div>
           </div>
-          <div className="text-4xl font-bold">${price.toFixed(2)}</div>
-          <p className="text-gray-500">{description}</p>
-          <div className="flex items-center space-x-2">
-            {stock ? (
-              <Badge variant="default" className="bg-green-500">
-                <Check className="mr-1 h-4 w-4" /> In Stock
-              </Badge>
-            ) : (
-              <Badge variant="destructive">
-                <X className="mr-1 h-4 w-4" /> Out of Stock
-              </Badge>
-            )}
-          </div>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold">{name}</h1>
+              <div className="flex gap-3">
+                {categories.length > 0
+                  ? categories.map((category) => (
+                      <Badge
+                        key={category.name}
+                        variant="secondary"
+                        className="text-sm"
+                      >
+                        {category.name}
+                      </Badge>
+                    ))
+                  : "unknown"}
+              </div>
+            </div>
+            <div className="text-4xl font-bold">${price.toFixed(2)}</div>
+            <p className="text-gray-500">{description}</p>
+            <div className="flex items-center space-x-2">
+              {stock ? (
+                <Badge variant="default" className="bg-green-500">
+                  <Check className="mr-1 h-4 w-4" /> In Stock
+                </Badge>
+              ) : (
+                <Badge variant="destructive">
+                  <X className="mr-1 h-4 w-4" /> Out of Stock
+                </Badge>
+              )}
+            </div>
 
-          {/* Quantity Selector */}
-          <div className="flex items-center space-x-4">
+            {/* Quantity Selector */}
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                onClick={decreaseQuantity}
+                disabled={quantity === 1}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="text-xl font-semibold">{quantity}</span>
+              <Button variant="outline" onClick={increaseQuantity}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Add to Cart Button */}
             <Button
-              variant="outline"
-              onClick={decreaseQuantity}
-              disabled={quantity === 1}
+              size="lg"
+              className="w-full md:w-auto"
+              disabled={!stock}
+              onClick={handleAddCartButton}
             >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <span className="text-xl font-semibold">{quantity}</span>
-            <Button variant="outline" onClick={increaseQuantity}>
-              <Plus className="h-4 w-4" />
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              Add {quantity} to Cart
             </Button>
           </div>
-
-          {/* Add to Cart Button */}
-          <Button
-            size="lg"
-            className="w-full md:w-auto"
-            disabled={!stock}
-            onClick={handleAddCartButton}
-          >
-            <ShoppingCart className="mr-2 h-5 w-5" />
-            Add {quantity} to Cart
-          </Button>
         </div>
+        <Toaster />
       </div>
-      <Toaster />
     </div>
   );
 };

@@ -6,7 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,c
+  SheetFooter,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react";
@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import useProductStore from "@/utils/zustand";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
+import { CartItem } from "@/types";
 
 const Cart = () => {
   const {
@@ -43,14 +44,10 @@ const Cart = () => {
     0
   );
 
-  const updateQuantityOptimistic = (
-    cartId: string,
-    productId: number,
-    newQuantity: number
-  ) => {
-    if (newQuantity < 1) return;
+  const updateQuantityOptimistic = (cartId: number, productId: number, quantity:  number) => {
+    if (quantity < 1) return;
 
-    updateCartItemOptimistic(cartId, productId, newQuantity);
+    updateCartItemOptimistic(cartId, productId, quantity);
   };
 
   const handleRemoveItemOptimistic = (cartId: number, productId: number) => {
@@ -82,7 +79,7 @@ const Cart = () => {
           </SheetHeader>
           <ScrollArea className="flex-grow mt-6 -mr-4 pr-4">
             <AnimatePresence initial={false}>
-              {cartArray.map((item) => (
+              {cartArray.map((item: CartItem) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -94,7 +91,7 @@ const Cart = () => {
                   <div className="flex items-center space-x-4">
                     <div className="relative w-20 h-20 rounded-md overflow-hidden">
                       <Image
-                        src={item.product.imageUrl}
+                        src={item.product.imageUrl || ""}
                         alt={item.product.name}
                         layout="fill"
                         objectFit="cover"

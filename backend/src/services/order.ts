@@ -2,11 +2,20 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import { Order, OrderItem } from "../types/order";
 export const addOrder = async (orderData: Order) => {
-  const { clerkUserId, status: statusData, totalAmount } = orderData;
+  const { clerkUserId, status, totalAmount } = orderData;
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId },
+  });
+
+  if (!user) {
+    return new Error("User Not Found")
+  }
+
   return await prisma.order.create({
     data: {
-      userId: 1,
-      status: statusData,
+      userId: user?.id,
+      status: status,
       totalAmount: totalAmount,
     },
   });

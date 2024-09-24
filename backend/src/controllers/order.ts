@@ -4,9 +4,9 @@ import { Request, Response } from "express";
 import { Order, OrderItem } from "../types/order";
 
 export const addOrderController = async (req: Request, res: Response) => {
-  const order: Order = { ...req.body };
+  const { clerkUserId, status, totalAmount }: Order = req.body;
   try {
-    await addOrder(order);
+    await addOrder({ clerkUserId, status, totalAmount });
     res.status(201).json({ message: "Order created successfully!" });
   } catch (error: any) {
     console.error("Error happened:", error.message);

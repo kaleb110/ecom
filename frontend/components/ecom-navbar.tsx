@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
+import { User } from "@/types";
 const categories = [
   { value: "all", label: "All Categories" },
   { value: "electronics", label: "Electronics" },
@@ -26,7 +27,7 @@ const categories = [
 ];
 
 export function EcomNavbarComponent() {
-  const { signInUser, user: storedUser } = useProductStore();
+  const { signInUser } = useProductStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isLoaded } = useUser(); // Now this hook is inside a valid React component
@@ -57,10 +58,11 @@ export function EcomNavbarComponent() {
         return;
       }
 
+      const userData: User = { clerkUserId, email, name };
       // Sync user with the backend
-      signInUser({clerkUserId, email, name});
+      signInUser(userData);
     }
-  }, [user, isLoaded]);
+  }, [user, isLoaded, signInUser]);
 
   return (
     <nav className="bg-white shadow sticky top-0 z-50">

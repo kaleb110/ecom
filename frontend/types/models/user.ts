@@ -1,14 +1,14 @@
 import { Order } from "./order";
 import { Cart } from "./cart";
 export interface User {
-  id: number;
+  id?: number;
   clerkUserId: string;
   name: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 
   // Relationships
-  orders: Order[];
+  orders?: Order[];
   cart?: Cart;
 }

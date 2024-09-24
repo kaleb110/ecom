@@ -16,13 +16,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, ShoppingCart } from "lucide-react";
 import useProductStore from "@/utils/zustand";
-
 export function ProductCardComponent() {
   const { products, error, isLoading, fetchProducts } = useProductStore();
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   if (isLoading) {
     return (
@@ -59,7 +58,7 @@ export function ProductCardComponent() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
       {products.map((product) => {
         const { id, name, price, description, imageUrl, categories } = product;
-        const rating = product.rating || 4; // Default rating if not provided
+        const rating = 4; // Default rating if not provided
 
         return (
           <motion.div
@@ -72,7 +71,7 @@ export function ProductCardComponent() {
               <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105">
                 <div className="relative aspect-w-16 aspect-h-9">
                   <Image
-                    src={imageUrl}
+                    src={imageUrl ||""}
                     alt={name}
                     objectFit="cover"
                     className="rounded-t-lg w-full"

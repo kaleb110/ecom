@@ -111,33 +111,6 @@ export const removeProductFromCart = async (cartData: {
   });
 };
 
-export const resetCart = async (clerkUserId: string) => {
-  const user = await prisma.user.findUnique({
-    where: {clerkUserId}
-  })
-
-  if (!user) {
-    return new Error("User Not Found")
-  }
-
-  const cart = await prisma.cart.findUnique({
-    where: {
-      userId: user.id
-    }
-  })
-
-  if (!cart) {
-    return new Error("User Not Found");
-  }
-
-  await prisma.cartItem.deleteMany({
-    where: {
-      cartId: cart.id
-    }
-  })
-}
-
-
 export const updateCartItem = async (cartData: {
   cartId: any;
   productId: number;
@@ -169,3 +142,4 @@ export const updateCartItem = async (cartData: {
     },
   });
 };
+

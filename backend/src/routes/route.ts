@@ -22,11 +22,6 @@ import { paymentController } from "../controllers/stripe";
 import { resetCartController } from "../controllers/cart";
 
 const router = Router();
-// user signup route
-router.post("/signin", addUserController);
-
-// stripe payment
-router.post("/payment", paymentController)
 
 // Product routes
 router.get("/products", getProductsController);
@@ -51,7 +46,14 @@ router.delete(
 //TODO: reset cart 
 router.post("/cart/reset", resetCartController)
 // Order routes
-router.post("/orders", addOrderController);
+router.post("/order", addOrderController);
 router.post("/orderitem", addOrderItemController);
 
+// user signup route
+router.post("/signin", addUserController);
+
+// stripe payment
+router.post("/payment", paymentController)
+
+// order route
 export default router;

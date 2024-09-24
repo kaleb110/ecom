@@ -1,17 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { CartItem, Product, User } from "@/types";
-interface Store {
-  user: User | null;
-  cartItems: CartItem[];
-  products: Product[];
-  productDetail: Product | null;
-  isLoading: boolean;
-  error: string | null;
-  signInUser: (user: User) => void;
-  updateCartItemOptimistic: (cart: CartItem) => void;
-  calculateTotalPrice: (cartitem: CartItem[]) => void
-}
+import { Store } from "@/types";
 
 const useProductStore = create<Store>((set, get) => ({
   user: null,
@@ -20,11 +9,14 @@ const useProductStore = create<Store>((set, get) => ({
   productDetail: null,
   isLoading: false,
   error: null,
+  orders: [],
+  totalAmount: 0,
 
-  signInUser: async (user) => {
+  // sign in the user on page load
+  signInUser: async (userData) => {
     set({ isLoading: true });
 
-    const { clerkUserId, email, name } = user;
+    const { clerkUserId, email, name } = userData;
     try {
       // Sync the user with the backend
       const response = await axios.post("http://localhost:5000/signin", {
@@ -56,6 +48,7 @@ const useProductStore = create<Store>((set, get) => ({
     }
   },
 
+  // go to stripe payment page
   proceedToCheckout: async () => {
     const { cartItems } = get();
     if (cartItems.length === 0) {
@@ -84,7 +77,7 @@ const useProductStore = create<Store>((set, get) => ({
   },
 
   // Fetch product details for a single product by ID
-  fetchProductDetail: async (id: string) => {
+  fetchProductDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`http://localhost:5000/products/${id}`);
@@ -94,7 +87,8 @@ const useProductStore = create<Store>((set, get) => ({
     }
   },
 
-  fetchCartItems: async (clerkUserId: string) => {
+  // Display a list of cart items on the cart
+  fetchCartItems: async (clerkUserId) => {
     set({ isLoading: true, error: null });
 
     if (!clerkUserId) {
@@ -119,7 +113,8 @@ const useProductStore = create<Store>((set, get) => ({
     }
   },
 
-  resetCart: async (clerkUserId: string) => {
+  // reset the cart after successful payment
+  resetCart: async (clerkUserId) => {
     set({ isLoading: true, error: null });
 
     try {
@@ -162,10 +157,13 @@ const useProductStore = create<Store>((set, get) => ({
 
   // Calculate the total price of the cart items
   calculateTotalPrice: (cartItems = []) => {
-    return cartItems.reduce(
+    
+    const total = cartItems.reduce(
       (total, item) => total + item.product.price * item.quantity,
       0
     );
+    set({ totalAmount: total})
+    return total
   },
 
   // Optimistically update cart item quantity
@@ -186,12 +184,12 @@ const useProductStore = create<Store>((set, get) => ({
       })
       .catch((error) => {
         console.error("Failed to update cart item:", error);
-        // Optionally handle failure and rollback the optimistic update here
+        // handle failure and rollback the optimistic update here
       });
   },
 
   // Optimistically remove an item from the cart
-  removeFromCartOptimistic: (cartId: number, productId: number) => {
+  removeFromCartOptimistic: (cartId, productId) => {
     // Optimistically remove the item from the state first
     set((state) => ({
       cartItems: state.cartItems.filter(
@@ -206,6 +204,19 @@ const useProductStore = create<Store>((set, get) => ({
         console.error("Failed to remove item from cart:", error);
         // Optionally handle failure and rollback the optimistic removal here
       });
+  },
+
+  addOrder: (clerkUserId, status, totalAmount) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      axios.post("http://localhost:5000/order", { clerkUserId, status, totalAmount });
+      console.log("Successfully order created !");
+      
+    } catch (error) {
+      console.error("Failed to add Order");
+      set({ error: "cant add to order", isLoading: false });
+    }
   },
 }));
 

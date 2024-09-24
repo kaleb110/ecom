@@ -6,3 +6,4 @@ export * from "./models/order";
 export * from "./models/orderItem";
 export * from "./models/product";
 export * from "./models/productCategory";
+export * from "./models/store"

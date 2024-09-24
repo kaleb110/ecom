@@ -1,7 +1,5 @@
-import { clerkClient } from "@clerk/clerk-sdk-node";
 import { getUser, createUser } from "../services/user";
 import { Request, Response } from "express";
-import { User } from "../types/user";
 // user
 
 export const addUserController = async (req: Request, res: Response) => {

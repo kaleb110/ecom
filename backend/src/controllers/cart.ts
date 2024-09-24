@@ -11,7 +11,6 @@ import {
 } from "../services/cart";
 import { Request, Response } from "express";
 import { Cart } from "../types/cart";
-import { resetCart } from "../services/cart";
 
 export const addProductToCartController = async (req: Request, res:Response) => {
 

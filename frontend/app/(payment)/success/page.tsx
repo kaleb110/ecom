@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const SuccessPageComponent = () => {
-  const { resetCart } = useProductStore(); // Assuming you have a resetCart action in your Zustand store
+  const { resetCart, addOrder, calculateTotalPrice, totalAmount } = useProductStore(); // Assuming you have a resetCart action in your Zustand store
   const { user, isLoaded } = useUser(); // Assuming you have a custom hook to fetch user data
   const userEmail = user?.email || "user@example.com"; // Fallback to a default email if not available
   const router = useRouter();
@@ -23,10 +23,16 @@ const SuccessPageComponent = () => {
     };
 
     handleResetCart();
-  }, [user, isLoaded]);
+  }, [user, isLoaded, resetCart]);
 
   const handleContinueShopping = () => {
     router.push("/");
+  };
+
+  const handleVeiwOrder = () => {
+    const status = "success"
+    addOrder(user?.id, status, totalAmount);
+    router.push("/order");
   };
 
   return (
@@ -47,11 +53,11 @@ const SuccessPageComponent = () => {
               <div className="flex items-center justify-center text-sm text-muted-foreground">
                 <Mail className="mr-2 h-4 w-4" />
                 <span>
-                  We've sent a confirmation email to{" "}
+                  We have sent a confirmation email to{" "}
                   <strong>{userEmail}</strong>
                 </span>
               </div>
-              <Button className="w-full">
+              <Button className="w-full" onClick={handleVeiwOrder}>
                 <FileText className="mr-2 h-4 w-4" />
                 View Order Details
               </Button>
