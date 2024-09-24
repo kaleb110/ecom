@@ -18,10 +18,15 @@ import {
 } from "../controllers/order";
 import { validate } from "../middlewares/validate";
 import { addProductValidator } from "../validator/validator";
-const router = Router();
+import { paymentController } from "../controllers/stripe";
+import { resetCartController } from "../controllers/cart";
 
+const router = Router();
 // user signup route
 router.post("/signin", addUserController);
+
+// stripe payment
+router.post("/payment", paymentController)
 
 // Product routes
 router.get("/products", getProductsController);
@@ -43,7 +48,8 @@ router.delete(
   "/cart/items/:cartId/:productId",
   removeProductFromCartController
 );
-
+//TODO: reset cart 
+router.post("/cart/reset", resetCartController)
 // Order routes
 router.post("/orders", addOrderController);
 router.post("/orderitem", addOrderItemController);

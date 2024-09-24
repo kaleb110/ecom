@@ -1,18 +1,30 @@
 import { create } from "zustand";
 import axios from "axios";
+import { CartItem, Product, User } from "@/types";
+interface Store {
+  user: User | null;
+  cartItems: CartItem[];
+  products: Product[];
+  productDetail: Product | null;
+  isLoading: boolean;
+  error: string | null;
+  signInUser: (user: User) => void;
+  updateCartItemOptimistic: (cart: CartItem) => void;
+  calculateTotalPrice: (cartitem: CartItem[]) => void
+}
 
-const useProductStore = create((set) => ({
-  // Store State
-  user: null, // authticated user
-  products: [], // Stores the product list
-  cartItems: [], // Stores the cart items
-  productDetail: null, // Stores the detailed product data
-  isLoading: false, // Loading state for async operations
-  error: null, // Error state to capture errors
+const useProductStore = create<Store>((set, get) => ({
+  user: null,
+  products: [],
+  cartItems: [],
+  productDetail: null,
+  isLoading: false,
+  error: null,
 
-  signInUser: async (clerkUserId, email, name) => {
+  signInUser: async (user) => {
     set({ isLoading: true });
 
+    const { clerkUserId, email, name } = user;
     try {
       // Sync the user with the backend
       const response = await axios.post("http://localhost:5000/signin", {
@@ -44,17 +56,32 @@ const useProductStore = create((set) => ({
     }
   },
 
-  // handleCheckout: async () => {
-  //   set({ isLoading: true });
+  proceedToCheckout: async () => {
+    const { cartItems } = get();
+    if (cartItems.length === 0) {
+      return set({ error: "No items in cart" });
+    }
 
-  //   try {
-  //     const response = axios.post("http://localhost:5000/api/checkout");
-  //     set({})
-  //   } catch (error) {
-  //     console.error("Error handling checkout")
-  //     set({error: "Failed to handle checkout!"})
-  //   }
-  // },
+    try {
+      set({ isLoading: true });
+      const response = await axios.post("http://localhost:5000/payment", {
+        cartItems,
+      });
+      const { url } = response.data;
+      if (url) {
+        window.location.href = url; // Redirect to Stripe Checkout
+      }
+    } catch (error) {
+      set({
+        error:
+          error?.response?.data?.message ||
+          "Checkout failed. Please try again.",
+        isLoading: false,
+      });
+    } finally {
+      set({ isLoading: false }); // Always remove loading state after the request
+    }
+  },
 
   // Fetch product details for a single product by ID
   fetchProductDetail: async (id: string) => {
@@ -89,6 +116,21 @@ const useProductStore = create((set) => ({
     } catch (error) {
       console.error("Error fetching cart items:", error);
       set({ error: "Failed to fetch cart items!", isLoading: false });
+    }
+  },
+
+  resetCart: async (clerkUserId: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      // Make the API request to reset the cart in the database
+      await axios.post(`http://localhost:5000/cart/reset`, { clerkUserId });
+
+      // Clear cartItems in Zustand once the API request succeeds
+      set({ cartItems: [], isLoading: false });
+    } catch (error) {
+      console.error("Error resetting cart!", error);
+      set({ error: "Error resetting cart!", isLoading: false });
     }
   },
 

@@ -6,7 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
+  SheetFooter,c
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react";
@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import useProductStore from "@/utils/zustand";
 import Image from "next/image";
-import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 
 const Cart = () => {
@@ -23,12 +22,14 @@ const Cart = () => {
     cartItems,
     updateCartItemOptimistic,
     removeFromCartOptimistic,
+    proceedToCheckout,
+    isLoading,
+    error,
   } = useProductStore();
 
-  const { user, isLoaded } = useUser(); // Clerk provides `isLoaded` to check if the user data is ready
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    // Ensure that `user` is available and `user.id` exists before calling fetchCartItems
     if (isLoaded && user) {
       fetchCartItems(user.id);
     }
@@ -47,13 +48,17 @@ const Cart = () => {
     productId: number,
     newQuantity: number
   ) => {
-    if (newQuantity < 1) return; // Ensure quantity is not below 1
+    if (newQuantity < 1) return;
 
     updateCartItemOptimistic(cartId, productId, newQuantity);
   };
 
   const handleRemoveItemOptimistic = (cartId: number, productId: number) => {
     removeFromCartOptimistic(cartId, productId);
+  };
+
+  const handleCheckout = async () => {
+    await proceedToCheckout();
   };
 
   return (
@@ -161,9 +166,14 @@ const Cart = () => {
                 <span>Total:</span>
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
-              <Link href={"/checkout"}>
-                <Button className="w-full">Checkout</Button>
-              </Link>
+              <Button
+                className="w-full"
+                onClick={handleCheckout}
+                disabled={isLoading}
+              >
+                {isLoading ? "processing..." : "Checkout"}
+              </Button>
+              {error && <p>error on checkout</p>}
             </div>
           </SheetFooter>
         </SheetContent>

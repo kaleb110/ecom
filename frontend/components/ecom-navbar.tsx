@@ -58,7 +58,7 @@ export function EcomNavbarComponent() {
       }
 
       // Sync user with the backend
-      signInUser(clerkUserId, email, name);
+      signInUser({clerkUserId, email, name});
     }
   }, [user, isLoaded]);
 

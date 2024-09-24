@@ -1,4 +1,7 @@
 // cart
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
 import {
   addProductToCart,
   deleteCartItem,
@@ -8,6 +11,7 @@ import {
 } from "../services/cart";
 import { Request, Response } from "express";
 import { Cart } from "../types/cart";
+import { resetCart } from "../services/cart";
 
 export const addProductToCartController = async (req: Request, res:Response) => {
 
@@ -79,3 +83,39 @@ export const removeProductFromCartController = async (
     res.status(500).json({ message: "Failed to remove product from cart" });
   }
 };
+
+export const resetCartController = async (req: Request, res: Response) => {
+  const { clerkUserId } = req.body;
+
+  try {
+    // Find the user by clerkUserId
+    const user = await prisma.user.findUnique({
+      where: { clerkUserId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User Not Found" });
+    }
+
+    // Find the user's cart
+    const cart = await prisma.cart.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!cart) {
+      return res.status(404).json({ error: "Cart Not Found" });
+    }
+
+    // Delete cart items associated with the cart
+    await prisma.cartItem.deleteMany({
+      where: { cartId: cart.id },
+    });
+
+    return res.status(200).json({ message: "Cart reset successfully" });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ error: "Error resetting cart", details: error.message });
+  }
+};
+
