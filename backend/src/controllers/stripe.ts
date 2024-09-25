@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { Request, Response } from "express";
+
 const stripe = new Stripe(process.env.SECRET_KEY!, {
   apiVersion: "2024-06-20",
 });
@@ -12,8 +13,9 @@ export const paymentController = async (req: Request, res: Response) => {
   }
 
   try {
+    let totalAmount = 0; // Initialize totalAmount
+
     const line_items = cartItems.map((item: any) => {
-      // Validate price and quantity for each item
       const priceInCents = Math.round(item.product.price * 100); // Convert price to cents
       if (typeof priceInCents !== "number" || isNaN(priceInCents)) {
         throw new Error(`Invalid price for item: ${JSON.stringify(item)}`);
@@ -21,6 +23,8 @@ export const paymentController = async (req: Request, res: Response) => {
       if (typeof item.quantity !== "number" || isNaN(item.quantity)) {
         throw new Error(`Invalid quantity for item: ${JSON.stringify(item)}`);
       }
+
+      totalAmount += priceInCents * item.quantity; // Calculate total amount
 
       return {
         price_data: {
@@ -42,7 +46,8 @@ export const paymentController = async (req: Request, res: Response) => {
       cancel_url: `${process.env.CLIENT_URL}/cancel`, // Redirect URL after cancel
     });
 
-    res.json({ url: session.url });
+    // Return session URL and total amount
+    res.json({ url: session.url, totalAmount });
   } catch (error: any) {
     console.error("Error creating checkout session:", error);
     res.status(500).json({ error: error.message });

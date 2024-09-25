@@ -20,16 +20,21 @@ const Orders = () => {
 
   useEffect(() => {
     if (isLoaded && user?.id) {
+      console.log("User ID:", user.id); // Log user ID
       fetchOrders(user.id); // Fetch orders for the logged-in user
     }
   }, [isLoaded, user, fetchOrders]);
 
   if (isLoading) {
-    return <p>Loading orders...</p>;
+    return <p>Loading orders...</p>; // You could replace this with a loading spinner component
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return <p className="text-red-500">{error}</p>; // Styling for error message
+  }
+
+  if (orders.length === 0) {
+    return <p className="text-gray-500">You have no orders yet.</p>; // Message when no orders exist
   }
 
   return (

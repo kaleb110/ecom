@@ -28,6 +28,8 @@ const Cart = () => {
     error,
   } = useProductStore();
 
+  
+
   const { user, isLoaded } = useUser();
 
   useEffect(() => {

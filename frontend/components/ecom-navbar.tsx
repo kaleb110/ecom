@@ -31,7 +31,6 @@ export function EcomNavbarComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isLoaded } = useUser(); // Now this hook is inside a valid React component
-  console.log(user);
 
   useEffect(() => {
     if (isLoaded && user) {

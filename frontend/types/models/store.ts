@@ -15,7 +15,6 @@ export interface Store {
     productId: number,
     quantity: number
   ) => void;
-  calculateTotalPrice: (cartitem: CartItem[]) => void;
   fetchProducts: () => void;
   fetchCartItems: (clerkUserId: string) => void;
   removeFromCartOptimistic: (cartId: number, productId: number) => void;
@@ -27,8 +26,7 @@ export interface Store {
     productId: number | undefined,
     quantity: number
   ) => void;
-  addOrder: (clerkUserId: string, status: string, totalAmount: number) => void;
-  fetchOrders: (
-    clerkUserId: string
-  ) => void;
+  addOrder: (clerkUserId: string, status: string, totalAmount: number, cartItems: CartItem[]) => void;
+  fetchOrders: (clerkUserId: string) => void;
+  calculateTotalPrice: () => void
 }

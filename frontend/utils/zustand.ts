@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import { Store } from "@/types";
+import { error } from "console";
 
 const useProductStore = create<Store>((set, get) => ({
   user: null,
@@ -12,20 +13,16 @@ const useProductStore = create<Store>((set, get) => ({
   orders: [],
   totalAmount: 0,
 
-  // sign in the user on page load
+  // Sign in the user on page load
   signInUser: async (userData) => {
     set({ isLoading: true });
-
     const { clerkUserId, email, name } = userData;
     try {
-      // Sync the user with the backend
       const response = await axios.post("http://localhost:5000/signin", {
         clerkUserId,
         email,
         name,
       });
-
-      // Store the user data in Zustand state
       set({ user: response.data, isLoading: false });
     } catch (error) {
       console.error(
@@ -40,7 +37,7 @@ const useProductStore = create<Store>((set, get) => ({
   fetchProducts: async () => {
     set({ isLoading: true });
     try {
-      const response = await axios.get("http://localhost:5000/products"); // Update with your API endpoint
+      const response = await axios.get("http://localhost:5000/products");
       set({ products: response.data, isLoading: false });
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -48,18 +45,35 @@ const useProductStore = create<Store>((set, get) => ({
     }
   },
 
-  // go to stripe payment page
-  proceedToCheckout: async () => {
+  // Calculate the total price of the cart items
+  calculateTotalPrice: () => {
     const { cartItems } = get();
+    const total = cartItems.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0
+    );
+    set({ totalAmount: total });
+    return total; // Ensure it returns the total amount
+  },
+
+  // Go to Stripe payment page
+  proceedToCheckout: async () => {
+    const { cartItems, calculateTotalPrice } = get();
     if (cartItems.length === 0) {
       return set({ error: "No items in cart" });
     }
 
     try {
       set({ isLoading: true });
+
+      // Calculate total amount and store it in state
+      calculateTotalPrice();
+
+      // Proceed to payment
       const response = await axios.post("http://localhost:5000/payment", {
         cartItems,
       });
+
       const { url } = response.data;
       if (url) {
         window.location.href = url; // Redirect to Stripe Checkout
@@ -90,20 +104,18 @@ const useProductStore = create<Store>((set, get) => ({
   // Display a list of cart items on the cart
   fetchCartItems: async (clerkUserId) => {
     set({ isLoading: true, error: null });
-
     if (!clerkUserId) {
       set({ error: "No clerkUserId provided", isLoading: false });
       return;
     }
-
     try {
       const response = await axios.get(
         `http://localhost:5000/cart/${clerkUserId}`
       );
-
-      // Validate the response format to avoid potential issues
       if (response.data && response.data.items) {
         set({ cartItems: response.data.items, isLoading: false });
+        // Calculate total price whenever cart items are fetched
+        get().calculateTotalPrice();
       } else {
         set({ cartItems: [], isLoading: false });
       }
@@ -112,6 +124,7 @@ const useProductStore = create<Store>((set, get) => ({
       set({ error: "Failed to fetch cart items!", isLoading: false });
     }
   },
+
   // Add a product to the cart
   addToCartOptimistic: (clerkUserId, productId, quantity) => {
     set((state) => ({
@@ -132,25 +145,17 @@ const useProductStore = create<Store>((set, get) => ({
         productId,
         quantity,
       })
+      .then(() => {
+        get().calculateTotalPrice(); // Recalculate total amount after adding item
+      })
       .catch((error) => {
         console.error("Failed to add item to cart:", error);
         // Optionally, implement rollback logic here
       });
   },
 
-  // Calculate the total price of the cart items
-  calculateTotalPrice: (cartItems = []) => {
-    const total = cartItems.reduce(
-      (total, item) => total + item.product.price * item.quantity,
-      0
-    );
-    set({ totalAmount: total });
-    return total;
-  },
-
   // Optimistically update cart item quantity
   updateCartItemOptimistic: (cartId, productId, quantity) => {
-    // Update cart items immediately in state (Optimistic Update)
     set((state) => ({
       cartItems: state.cartItems.map((item) =>
         item.product.id === productId ? { ...item, quantity: quantity } : item
@@ -160,19 +165,21 @@ const useProductStore = create<Store>((set, get) => ({
     // Make API call to persist the update
     axios
       .put(`http://localhost:5000/cart/items`, {
-        cartId, // cartId should represent the cart's user or the cart itself
+        cartId,
         productId,
         quantity,
       })
+      .then(() => {
+        get().calculateTotalPrice(); // Recalculate total amount after updating item
+      })
       .catch((error) => {
         console.error("Failed to update cart item:", error);
-        // handle failure and rollback the optimistic update here
+        // Handle failure and rollback the optimistic update here
       });
   },
 
   // Optimistically remove an item from the cart
   removeFromCartOptimistic: (cartId, productId) => {
-    // Optimistically remove the item from the state first
     set((state) => ({
       cartItems: state.cartItems.filter(
         (item) => item.product.id !== productId
@@ -182,37 +189,58 @@ const useProductStore = create<Store>((set, get) => ({
     // Make the API call to remove the item from the server
     axios
       .delete(`http://localhost:5000/cart/items/${cartId}/${productId}`)
+      .then(() => {
+        get().calculateTotalPrice(); // Recalculate total amount after removing item
+      })
       .catch((error) => {
         console.error("Failed to remove item from cart:", error);
         // Optionally handle failure and rollback the optimistic removal here
       });
   },
 
-  // Add an order to the backend and update the orders state
-  addOrder: async (clerkUserId, status, totalAmount) => {
-    set({ isLoading: true, error: null });
-    try {
-      const orderItems = get().cartItems.map((item) => ({
-        productId: item.product.id,
-        quantity: item.quantity,
-        price: item.product.price,
-      }));
+  addOrder: async (clerkUserId, status, totalAmount, cartItems) => {
+    if (totalAmount <= 0) {
+      throw new Error("Total amount is zero, cannot create order."); // Throw an error for failure
+    }
 
-      const response = await axios.post(`http://localhost:5000/orders`, {
+    try {
+      set({ isLoading: true, error: null });
+
+      const response = await axios.post("http://localhost:5000/orders", {
         clerkUserId,
-        status,
         totalAmount,
-        items: orderItems,
+        status,
+        items: cartItems.map((item) => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          price: item.product.price,
+        })),
       });
 
-      set((state) => ({
-        orders: [...state.orders, response.data],
-        cartItems: [],
-        totalAmount: 0,
-        isLoading: false,
-      }));
+      if (response.data) {
+        // Handle successful order creation
+        set((state) => ({
+          orders: [...state.orders, response.data],
+          cartItems: [], // Clear cart items after order
+          totalAmount: 0, // Reset total amount
+          isLoading: false,
+        }));
+      } else {
+        throw new Error("Order creation failed.");
+      }
     } catch (error) {
       set({ error: "Failed to create order", isLoading: false });
+      throw error; // Re-throw the error so it can be caught in `useEffect`
+    }
+  },
+  resetCart: async (clerkUserId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await axios.post(`http://localhost:5000/cart/reset`, { clerkUserId });
+      set({ cartItems: [], isLoading: false });
+    } catch (error) {
+      console.error("Failed to reset cart:", error);
+      set({ error: "Failed to reset cart", isLoading: false });
     }
   },
 
@@ -224,23 +252,8 @@ const useProductStore = create<Store>((set, get) => ({
       );
       set({ orders: response.data, isLoading: false });
     } catch (error) {
+      console.error("Failed to fetch orders:", error);
       set({ error: "Failed to fetch orders", isLoading: false });
-    }
-  },
-
-  // reset the cart after successful payment
-  resetCart: async (clerkUserId) => {
-    set({ isLoading: true, error: null });
-
-    try {
-      // Make the API request to reset the cart in the database
-      await axios.post(`http://localhost:5000/cart/reset`, { clerkUserId });
-
-      // Clear cartItems in Zustand once the API request succeeds
-      set({ cartItems: [], isLoading: false });
-    } catch (error) {
-      console.error("Error resetting cart!", error);
-      set({ error: "Error resetting cart!", isLoading: false });
     }
   },
 }));

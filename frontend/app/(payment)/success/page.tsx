@@ -10,25 +10,64 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const SuccessPageComponent = () => {
-  const { resetCart, addOrder, totalAmount } = useProductStore();
+  const {
+    resetCart,
+    addOrder,
+    isLoading,
+    error,
+    cartItems,
+    fetchCartItems,
+    calculateTotalPrice,
+  } = useProductStore();
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  console.log(cartItems);
+  
 
-  useEffect(() => {
+useEffect(() => {
+  const fetchCartAndCreateOrder = async () => {
+    // Ensure user is loaded before proceeding
     if (isLoaded && user) {
-      // Reset cart after payment
-      resetCart(user.id);
-    }
-  }, [user, isLoaded, resetCart]);
+      console.log("Fetching cart items for user:", user.id);
 
-  const handleViewOrder = async () => {
-    if (user && totalAmount > 0) {
-      // Add order manually after successful payment
-      const status = "success"; // Set status as "success" for now
-      await addOrder(user.id, status, totalAmount);
+      // Fetch cart items from your API or store
+      await fetchCartItems(user.id); // This function should populate cartItems
+
+      // Re-fetch the latest state after fetching cart items
+      const { cartItems: updatedCartItems } = useProductStore.getState();
+
+      // Check if cart items are available
+      if (updatedCartItems.length > 0) {
+        // Calculate total after fetching cart items
+        const total = calculateTotalPrice();
+        console.log("Calculated total price:", total);
+
+        // Only create order if totalAmount is greater than 0
+        if (total > 0) {
+          const status = "success";
+          try {
+            console.log("Creating order with totalAmount:", total);
+            await addOrder(user.id, status, total, updatedCartItems);
+            console.log("Order created successfully");
+
+            // Reset cart after successful order creation
+            await resetCart(user.id);
+          } catch (error) {
+            console.error("Error creating order:", error);
+          }
+        } else {
+          console.error("Total amount is zero, cannot create order.");
+        }
+      } else {
+        console.error("Cart items are empty, cannot proceed.");
+      }
     }
-    router.push("/order");
   };
+
+  fetchCartAndCreateOrder();
+}, [user, isLoaded, addOrder, resetCart, calculateTotalPrice, fetchCartItems]);
+
+
 
   const handleContinueShopping = () => {
     router.push("/");
@@ -48,9 +87,15 @@ const SuccessPageComponent = () => {
             <p className="text-muted-foreground mb-6">
               Your payment was successful and your order has been placed.
             </p>
-            <Button className="w-full" onClick={handleViewOrder}>
+            {error && <p className="text-red-500">{error}</p>}{" "}
+            {/* Show error message if any */}
+            <Button
+              className="w-full"
+              onClick={() => router.push("/order")}
+              disabled={isLoading}
+            >
               <FileText className="mr-2 h-4 w-4" />
-              View Order Details
+              {isLoading && cartItems.length > 0 ? "Creating Order..." : "View Order Details"}
             </Button>
           </CardContent>
           <CardFooter className="justify-center">
@@ -58,6 +103,7 @@ const SuccessPageComponent = () => {
               variant="link"
               className="text-sm"
               onClick={handleContinueShopping}
+              disabled={isLoading}
             >
               Continue Shopping
               <ArrowRight className="ml-2 h-4 w-4" />

@@ -1,8 +1,5 @@
-// order
-import { getOrders } from "../services/order";
 import { Request, Response } from "express";
-import { OrderItem } from "../types/order";
-import { createOrder } from "../services/order";
+import { createOrder, getOrders } from "../services/order";
 
 export const createOrderController = async (req: Request, res: Response) => {
   try {
@@ -12,6 +9,8 @@ export const createOrderController = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing order data" });
     }
 
+    console.log("Creating order with data:", req.body); // Log order data
+
     const order = await createOrder({
       clerkUserId,
       totalAmount,
@@ -20,11 +19,12 @@ export const createOrderController = async (req: Request, res: Response) => {
     });
 
     res.status(201).json(order);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating order:", error);
-    res.status(500).json({ error: "Failed to create order" });
+    res.status(500).json({ error: error.message || "Failed to create order" });
   }
 };
+
 
 export const getOrdersByUserController = async (
   req: Request,
@@ -33,15 +33,18 @@ export const getOrdersByUserController = async (
   try {
     const { clerkUserId } = req.params;
 
+    console.log("Fetching orders for clerkUserId:", clerkUserId); // Log the received user ID
+
     if (!clerkUserId) {
       return res.status(400).json({ error: "Missing userId" });
     }
 
     const orders = await getOrders(clerkUserId);
 
+    console.log("Orders fetched:", orders); // Log fetched orders
     res.status(200).json(orders);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders" });
+    res.status(500).json({ error: error.message || "Failed to fetch orders" });
   }
 };
