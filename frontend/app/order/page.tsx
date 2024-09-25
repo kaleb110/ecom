@@ -1,9 +1,71 @@
-import React from 'react'
+"use client";
 
-const Order = () => {
+import { useEffect } from "react";
+import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { useUser } from "@clerk/nextjs";
+import useProductStore from "@/utils/zustand";
+
+const Orders = () => {
+  const { user, isLoaded } = useUser();
+  const { orders, fetchOrders, isLoading, error } = useProductStore();
+
+  useEffect(() => {
+    if (isLoaded && user?.id) {
+      fetchOrders(user.id); // Fetch orders for the logged-in user
+    }
+  }, [isLoaded, user, fetchOrders]);
+
+  if (isLoading) {
+    return <p>Loading orders...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
-    <div>Order</div>
-  )
-}
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Your Orders</h1>
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order Number</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
+                <TableCell>
+                  <Badge>
+                    {order.status.charAt(0).toUpperCase() +
+                      order.status.slice(1)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {format(new Date(order.createdAt), "MMM d, yyyy")}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+};
 
-export default Order
+export default Orders;

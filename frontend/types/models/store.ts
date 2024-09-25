@@ -8,6 +8,7 @@ export interface Store {
   isLoading: boolean;
   error: string | null;
   totalAmount: number;
+  orders: any;
   signInUser: (userData: User) => void;
   updateCartItemOptimistic: (
     cartId: number,
@@ -27,4 +28,7 @@ export interface Store {
     quantity: number
   ) => void;
   addOrder: (clerkUserId: string, status: string, totalAmount: number) => void;
+  fetchOrders: (
+    clerkUserId: string
+  ) => void;
 }

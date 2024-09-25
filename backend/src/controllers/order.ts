@@ -1,27 +1,47 @@
 // order
-import { addOrder, addOrderItem } from "../services/order";
+import { getOrders } from "../services/order";
 import { Request, Response } from "express";
-import { Order, OrderItem } from "../types/order";
+import { OrderItem } from "../types/order";
+import { createOrder } from "../services/order";
 
-export const addOrderController = async (req: Request, res: Response) => {
-  const { clerkUserId, status, totalAmount }: Order = req.body;
+export const createOrderController = async (req: Request, res: Response) => {
   try {
-    await addOrder({ clerkUserId, status, totalAmount });
-    res.status(201).json({ message: "Order created successfully!" });
-  } catch (error: any) {
-    console.error("Error happened:", error.message);
-    res.status(500).json({ error: "Cannot create order!" });
+    const { clerkUserId, totalAmount, items, status } = req.body;
+
+    if (!clerkUserId || !totalAmount || !items || items.length === 0) {
+      return res.status(400).json({ error: "Missing order data" });
+    }
+
+    const order = await createOrder({
+      clerkUserId,
+      totalAmount,
+      items,
+      status: status || "pending", // Default to pending
+    });
+
+    res.status(201).json(order);
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({ error: "Failed to create order" });
   }
 };
 
-export const addOrderItemController = async (req: Request, res: Response) => {
-  const orderItem: OrderItem = { ...req.body };
-
+export const getOrdersByUserController = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    await addOrderItem(orderItem);
-    res.status(201).json({ message: "Order item created successfully!" });
+    const { clerkUserId } = req.params;
+
+    if (!clerkUserId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    const orders = await getOrders(clerkUserId);
+
+    res.status(200).json(orders);
   } catch (error) {
-    console.error("Error happened:", error);
-    res.status(500).json({ error: "Cannot create order item!" });
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 };

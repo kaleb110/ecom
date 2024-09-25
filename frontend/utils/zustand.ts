@@ -112,23 +112,6 @@ const useProductStore = create<Store>((set, get) => ({
       set({ error: "Failed to fetch cart items!", isLoading: false });
     }
   },
-
-  // reset the cart after successful payment
-  resetCart: async (clerkUserId) => {
-    set({ isLoading: true, error: null });
-
-    try {
-      // Make the API request to reset the cart in the database
-      await axios.post(`http://localhost:5000/cart/reset`, { clerkUserId });
-
-      // Clear cartItems in Zustand once the API request succeeds
-      set({ cartItems: [], isLoading: false });
-    } catch (error) {
-      console.error("Error resetting cart!", error);
-      set({ error: "Error resetting cart!", isLoading: false });
-    }
-  },
-
   // Add a product to the cart
   addToCartOptimistic: (clerkUserId, productId, quantity) => {
     set((state) => ({
@@ -157,13 +140,12 @@ const useProductStore = create<Store>((set, get) => ({
 
   // Calculate the total price of the cart items
   calculateTotalPrice: (cartItems = []) => {
-    
     const total = cartItems.reduce(
       (total, item) => total + item.product.price * item.quantity,
       0
     );
-    set({ totalAmount: total})
-    return total
+    set({ totalAmount: total });
+    return total;
   },
 
   // Optimistically update cart item quantity
@@ -206,16 +188,59 @@ const useProductStore = create<Store>((set, get) => ({
       });
   },
 
-  addOrder: (clerkUserId, status, totalAmount) => {
+  // Add an order to the backend and update the orders state
+  addOrder: async (clerkUserId, status, totalAmount) => {
+    set({ isLoading: true, error: null });
+    try {
+      const orderItems = get().cartItems.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price,
+      }));
+
+      const response = await axios.post(`http://localhost:5000/orders`, {
+        clerkUserId,
+        status,
+        totalAmount,
+        items: orderItems,
+      });
+
+      set((state) => ({
+        orders: [...state.orders, response.data],
+        cartItems: [],
+        totalAmount: 0,
+        isLoading: false,
+      }));
+    } catch (error) {
+      set({ error: "Failed to create order", isLoading: false });
+    }
+  },
+
+  fetchOrders: async (clerkUserId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/orders/${clerkUserId}`
+      );
+      set({ orders: response.data, isLoading: false });
+    } catch (error) {
+      set({ error: "Failed to fetch orders", isLoading: false });
+    }
+  },
+
+  // reset the cart after successful payment
+  resetCart: async (clerkUserId) => {
     set({ isLoading: true, error: null });
 
     try {
-      axios.post("http://localhost:5000/order", { clerkUserId, status, totalAmount });
-      console.log("Successfully order created !");
-      
+      // Make the API request to reset the cart in the database
+      await axios.post(`http://localhost:5000/cart/reset`, { clerkUserId });
+
+      // Clear cartItems in Zustand once the API request succeeds
+      set({ cartItems: [], isLoading: false });
     } catch (error) {
-      console.error("Failed to add Order");
-      set({ error: "cant add to order", isLoading: false });
+      console.error("Error resetting cart!", error);
+      set({ error: "Error resetting cart!", isLoading: false });
     }
   },
 }));

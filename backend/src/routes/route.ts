@@ -13,8 +13,8 @@ import {
   updateCartItemController,
 } from "../controllers/cart";
 import {
-  addOrderController,
-  addOrderItemController,
+  createOrderController,
+  getOrdersByUserController,
 } from "../controllers/order";
 import { validate } from "../middlewares/validate";
 import { addProductValidator } from "../validator/validator";
@@ -46,8 +46,8 @@ router.delete(
 //TODO: reset cart 
 router.post("/cart/reset", resetCartController)
 // Order routes
-router.post("/order", addOrderController);
-router.post("/orderitem", addOrderItemController);
+router.post("/orders", createOrderController);
+router.get("/orders/:clerkUserId", getOrdersByUserController);
 
 // user signup route
 router.post("/signin", addUserController);
