@@ -1,5 +1,12 @@
 export interface Cart {
-  cartId: number;
+  clerkUserId: string;
   productId: number;
   quantity: number;
+}
+
+export interface CartItem {
+  cartId?: number;
+  productId?: number;
+  quantity?: number;
+  price?: number
 }

@@ -1,16 +1,14 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-export const createOrder = async (orderData: {
-  clerkUserId: string;
-  totalAmount: number;
-  items: { productId: number; quantity: number; price: number }[];
-  status: string;
-}) => {
+import { prisma } from "../config";
+import { CartItem } from "../types/cart";
+import { Order } from "../types/order";
+export const createOrder = async (orderData: Order) => {
   const { clerkUserId, totalAmount, items, status } = orderData;
 
-  console.log("Order data received:", orderData); // Log received data
+  if (!clerkUserId || !totalAmount || !items || items.length === 0) {
+    throw new Error("Missing order data");
+  }
+
+  console.log("Order data received:", orderData); 
 
   const user = await prisma.user.findUnique({
     where: { clerkUserId },
@@ -59,7 +57,7 @@ export const getOrders = async (clerkUserId: string) => {
     include: { items: { include: { product: true } } },
   });
 
-  console.log("Orders from database:", orders); // Log the orders from the database
+  console.log("Orders from database:", orders);
   return orders;
 };
 

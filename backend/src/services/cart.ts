@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
-import { Cart } from "../types/cart";
+import { prisma } from "../config";
+import { Cart, CartItem } from "../types/cart";
 
-export const addProductToCart = async (product: any) => {
-  const { clerkUserId, productId, quantity } = product;
+export const addProductToCart = async (cartItem: Cart) => {
+  const { clerkUserId, productId, quantity } = cartItem;
 
   // Find the user by their Clerk ID
   const user = await prisma.user.findUnique({
@@ -82,16 +81,13 @@ export const getCartItems = async (clerkUserId: string) => {
   }
 };
 
-export const deleteCartItem = async (cartItemId: any) => {
+export const deleteCartItem = async (cartItemId: number) => {
   return await prisma.cartItem.delete({
     where: { id: cartItemId },
   });
 };
 
-export const removeProductFromCart = async (cartData: {
-  cartId: number;
-  productId: number;
-}) => {
+export const removeProductFromCart = async (cartData: CartItem) => {
   const { cartId, productId } = cartData;
 
   const cart = await prisma.cart.findUnique({
@@ -111,12 +107,8 @@ export const removeProductFromCart = async (cartData: {
   });
 };
 
-export const updateCartItem = async (cartData: {
-  cartId: any;
-  productId: number;
-  quantity: number;
-}) => {
-  const { cartId, productId, quantity } = cartData;
+export const updateCartItem = async (cartItem: CartItem) => {
+  const { cartId, productId, quantity } = cartItem;
 
   // First, find the cart by `cartId`
   const cart = await prisma.cart.findUnique({
@@ -130,15 +122,15 @@ export const updateCartItem = async (cartData: {
   // Update the cart item or create it if it doesn't exist
   return await prisma.cartItem.upsert({
     where: {
-      cartId_productId: { cartId: cart.id, productId: productId },
+      cartId_productId: { cartId: cart.id, productId: Number(productId) },
     },
     update: {
       quantity: quantity, // Update the quantity if the item already exists
     },
     create: {
       cartId: cart.id,
-      productId: productId,
-      quantity: quantity, // Create a new item if it doesn't exist
+      productId: Number(productId),
+      quantity: Number(quantity), // Create a new item if it doesn't exist
     },
   });
 };

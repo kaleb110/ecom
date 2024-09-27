@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from "../config";
+import { User } from "../types/user";
 
 export const getUser = async (clerkUserId: string) => {
   return await prisma.user.findUnique({ where: { clerkUserId } });
 };
 
-export const createUser = async (userData: { clerkUserId: string; email: string; name: string }) => {
-  const { clerkUserId, email, name } = userData;
+export const createUser = async (user: User) => {
+  const { clerkUserId, email, name } = user;
   return await prisma.user.create({
     data: {
       clerkUserId,

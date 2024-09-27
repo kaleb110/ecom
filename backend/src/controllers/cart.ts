@@ -1,6 +1,5 @@
-// cart
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../config";
+import { CartItem } from "../types/cart";
 
 import {
   addProductToCart,
@@ -12,9 +11,11 @@ import {
 import { Request, Response } from "express";
 import { Cart } from "../types/cart";
 
-export const addProductToCartController = async (req: Request, res:Response) => {
-
-  const cartItem: Cart = {...req.body}
+export const addProductToCartController = async (
+  req: Request,
+  res: Response
+) => {
+  const cartItem: Cart = { ...req.body };
   try {
     await addProductToCart(cartItem);
     res.status(201).json({ message: "Product added to cart successfully!" });
@@ -25,10 +26,10 @@ export const addProductToCartController = async (req: Request, res:Response) => 
 };
 
 export const updateCartItemController = async (req: Request, res: Response) => {
-  const { cartId, productId, quantity } = req.body; // Extract relevant fields
+  const cartItem: CartItem = { ...req.body };
 
   try {
-    await updateCartItem({ cartId, productId, quantity });
+    await updateCartItem(cartItem);
     res.status(200).json({ message: "Cart item updated successfully" });
   } catch (error) {
     console.error("Error happened:", error);
@@ -36,9 +37,8 @@ export const updateCartItemController = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getCartItemsController = async (req: Request, res: Response) => {
-  const {clerkUserId} = req.params;
+  const { clerkUserId } = req.params;
 
   try {
     if (!clerkUserId) {
@@ -54,10 +54,10 @@ export const getCartItemsController = async (req: Request, res: Response) => {
 };
 
 export const deleteCartItemController = async (req: Request, res: Response) => {
-  const { cartItemId } = req.params;
+  const { cartId }: any = req.params;
 
   try {
-    await deleteCartItem(cartItemId);
+    await deleteCartItem(cartId);
     res.status(200).json({ message: "Item removed from cart" });
   } catch (error) {
     console.error("Error happened:", error);
@@ -69,13 +69,10 @@ export const removeProductFromCartController = async (
   req: Request,
   res: Response
 ) => {
-  const { cartId, productId } = req.params;
+  const cartItem: CartItem = {...req.params};
 
   try {
-    await removeProductFromCart({
-      cartId: Number(cartId),
-      productId: Number(productId),
-    }); // Ensure both values are numbers
+    await removeProductFromCart(cartItem); // Ensure both values are numbers
     res.status(200).json({ message: "Product removed from cart" });
   } catch (error) {
     console.error("Error removing product from cart:", error);
@@ -117,4 +114,3 @@ export const resetCartController = async (req: Request, res: Response) => {
       .json({ error: "Error resetting cart", details: error.message });
   }
 };
-

@@ -1,5 +1,5 @@
 export interface User {
-  clerkUserId?: string;
-  email?: string;
-  name?: string;
+  clerkUserId: string;
+  email: string;
+  name: string;
 }

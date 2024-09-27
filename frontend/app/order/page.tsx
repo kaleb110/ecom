@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@clerk/nextjs";
 import useProductStore from "@/utils/zustand";
+import { Order } from "@/types";
 
 const Orders = () => {
   const { user, isLoaded } = useUser();
@@ -51,7 +52,7 @@ const Orders = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.map((order) => (
+            {orders.map((order: Order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">{order.id}</TableCell>
                 <TableCell>${order.totalAmount.toFixed(2)}</TableCell>

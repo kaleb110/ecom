@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { Store } from "@/types";
-import { error } from "console";
+import { Product, Store } from "@/types";
 
 const useProductStore = create<Store>((set, get) => ({
   user: null,
@@ -12,6 +11,19 @@ const useProductStore = create<Store>((set, get) => ({
   error: null,
   orders: [],
   totalAmount: 0,
+
+  addProduct: async (product: Product) => {
+    set({ isLoading: true, error: null })
+    
+    try {
+      const newProduct = await axios.post("/products/add", product);
+      console.log("Product Added Successfully!", newProduct);
+      
+    } catch (error) {
+      console.error("Failed to add product!", error)
+      set({isLoading: false, error: error.message})
+    }
+  },
 
   // Sign in the user on page load
   signInUser: async (userData) => {
@@ -233,6 +245,7 @@ const useProductStore = create<Store>((set, get) => ({
       throw error; // Re-throw the error so it can be caught in `useEffect`
     }
   },
+
   resetCart: async (clerkUserId) => {
     set({ isLoading: true, error: null });
     try {

@@ -1,7 +1,7 @@
 // products
 import { getProducts, addProduct, getSingleProduct } from "../services/product";
 import { Request, Response } from "express";
-import { Search, Product } from "../types/product";
+import { Product } from "../types/product";
 
 export const getSingleProductController = async (
   req: Request,
@@ -10,7 +10,7 @@ export const getSingleProductController = async (
   const { id } = req.params;
 
   try {
-    const product = await getSingleProduct(parseInt(id));
+    const product = await getSingleProduct(Number(id));
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -50,16 +50,9 @@ export const getProductsController = async (req: Request, res: Response) => {
 
 export const addProductController = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, stock, imageUrl, categories } = req.body;
+    const product: Product = {...req.body};
 
-    await addProduct({
-      name,
-      description,
-      price: Number(price),
-      stock: Number(stock),
-      imageUrl,
-      categories, // Categories are an array of category IDs
-    });
+    await addProduct(product);
 
     res.status(201).json({ message: "Product added successfully!" });
   } catch (error) {

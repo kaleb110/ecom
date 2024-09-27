@@ -1,5 +1,5 @@
 import express from "express";
-// import { PORT } from "./config/index";
+import { PORT } from "./config/index";
 import router from "./routes/route";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -18,8 +18,8 @@ app.use("/", router);
 //   })
 // );
 
-app.listen(5000, () => {
-  console.log(`server started on port:http://localhost:${5000}`);
+app.listen(PORT, () => {
+  console.log(`server started on port:http://localhost:${PORT}`);
 });
 
 export default app;

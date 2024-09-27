@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../config";
 import { Product } from "../types/product";
 
 export const getProducts = async () => {
@@ -37,7 +36,7 @@ export const getSingleProduct = async (productId: number) => {
 //   });
 // };
 
-export const addProduct = async (product: any) => {
+export const addProduct = async (product: Product) => {
   const { name, description, price, stock, imageUrl, categories } = product;
 
   return await prisma.product.create({
@@ -49,7 +48,7 @@ export const addProduct = async (product: any) => {
       imageUrl,
       categories: {
         connect: categories.map((categoryId: number) => ({
-          id: Number(categoryId), // Ensure the category ID is an integer
+          id: Number(categoryId), 
         })),
       },
     },
