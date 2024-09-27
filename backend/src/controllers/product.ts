@@ -50,10 +50,10 @@ export const getProductsController = async (req: Request, res: Response) => {
 
 export const addProductController = async (req: Request, res: Response) => {
   try {
-    const product: Product = {...req.body};
+    const product: Product = { ...req.body };
+    console.log("Received image URL on backend:", product.imageUrl); // Should log the full URL with query parameters
 
     await addProduct(product);
-
     res.status(201).json({ message: "Product added successfully!" });
   } catch (error) {
     console.error("Error happened:", error);

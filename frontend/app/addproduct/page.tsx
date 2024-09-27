@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import useProductStore from "@/utils/zustand";
 
 const formSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
@@ -29,14 +30,14 @@ const formSchema = z.object({
 });
 
 const categories = [
-  { id: 1, name: "Electronics" },
-  { id: 2, name: "Clothing" },
-  { id: 3, name: "Books" },
-  { id: 4, name: "Home & Garden" },
-  { id: 5, name: "Toys" },
+  { id: 1, name: "Tech" },
+  { id: 2, name: "Car" },
+  { id: 3, name: "Health" },
+  { id: 4, name: "Sport" },
 ];
 
-export default function NewProductForm() {
+const NewProductForm = () => {
+  const { addProduct } = useProductStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,15 +52,18 @@ export default function NewProductForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (product: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
-      setIsSubmitting(false);
+    try {
+      // Use the original input value for imageUrl without any modification
+      await addProduct(product);
       form.reset();
-    }, 2000);
-  }
+    } catch (error) {
+      console.error("Error adding product:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-12">
@@ -148,9 +152,12 @@ export default function NewProductForm() {
                           type="number"
                           placeholder="0.00"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(
+                              value === "" ? "" : parseFloat(value)
+                            );
+                          }}
                           className="border-gray-300 text-black text-lg"
                         />
                       </FormControl>
@@ -172,9 +179,12 @@ export default function NewProductForm() {
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(parseInt(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(
+                              value === "" ? "" : parseInt(value, 10)
+                            );
+                          }}
                           className="border-gray-300 text-black text-lg"
                         />
                       </FormControl>
@@ -221,7 +231,7 @@ export default function NewProductForm() {
                           />
                           <label
                             htmlFor={`category-${category.id}`}
-                            className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            className="text-base font-medium leading-none"
                           >
                             {category.name}
                           </label>
@@ -258,4 +268,6 @@ export default function NewProductForm() {
       </Card>
     </div>
   );
-}
+};
+
+export default NewProductForm;

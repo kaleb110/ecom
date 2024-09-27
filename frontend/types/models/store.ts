@@ -9,6 +9,7 @@ export interface Store {
   error: string | null;
   totalAmount: number;
   orders: any;
+  addProduct: (product: Product) => void;
   signInUser: (userData: User) => void;
   updateCartItemOptimistic: (
     cartId: number,
@@ -26,7 +27,12 @@ export interface Store {
     productId: number | undefined,
     quantity: number
   ) => void;
-  addOrder: (clerkUserId: string, status: string, totalAmount: number, cartItems: CartItem[]) => void;
+  addOrder: (
+    clerkUserId: string,
+    status: string,
+    totalAmount: number,
+    cartItems: CartItem[]
+  ) => void;
   fetchOrders: (clerkUserId: string) => void;
-  calculateTotalPrice: () => void
+  calculateTotalPrice: () => void;
 }

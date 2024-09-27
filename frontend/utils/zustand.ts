@@ -12,16 +12,18 @@ const useProductStore = create<Store>((set, get) => ({
   orders: [],
   totalAmount: 0,
 
-  addProduct: async (product: Product) => {
-    set({ isLoading: true, error: null })
-    
+  addProduct: async (product) => {
+    set({ isLoading: true, error: null });
     try {
-      const newProduct = await axios.post("/products/add", product);
-      console.log("Product Added Successfully!", newProduct);
-      
+      console.log("Image URL before sending to backend:", product.imageUrl);
+      const response = await axios.post(
+        "http://localhost:5000/products/add",
+        product
+      );
+      console.log("Product added successfully!", response.data);
     } catch (error) {
-      console.error("Failed to add product!", error)
-      set({isLoading: false, error: error.message})
+      console.error("Failed to add product!", error);
+      set({ isLoading: false, error: error.message });
     }
   },
 

@@ -39,18 +39,39 @@ export const getSingleProduct = async (productId: number) => {
 export const addProduct = async (product: Product) => {
   const { name, description, price, stock, imageUrl, categories } = product;
 
-  return await prisma.product.create({
-    data: {
-      name,
-      description,
-      price,
-      stock,
-      imageUrl,
-      categories: {
-        connect: categories.map((categoryId: number) => ({
-          id: Number(categoryId), 
-        })),
+  try {
+    // Ensure that category IDs exist before connecting
+    const validCategories = await prisma.productCategory.findMany({
+      where: {
+        id: {
+          in: categories.map((categoryId: number) => Number(categoryId)),
+        },
       },
-    },
-  });
+    });
+
+    // Check if all categories are valid
+    if (validCategories.length !== categories.length) {
+      throw new Error("One or more categories are invalid");
+    }
+
+    // Create the product with valid categories
+    return await prisma.product.create({
+      data: {
+        name,
+        description,
+        price: Number(price),
+        stock: Number(stock),
+        imageUrl,
+        categories: {
+          connect: categories.map((categoryId: number) => ({
+            id: Number(categoryId),
+          })),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error in adding product:", error);
+    throw error;
+  }
 };
+
