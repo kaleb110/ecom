@@ -55,5 +55,4 @@ router.post("/signin", addUserController);
 // stripe payment
 router.post("/payment", paymentController)
 
-// order route
 export default router;

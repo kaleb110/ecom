@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.SECRET_KEY!, {
 });
 
 export const paymentController = async (req: Request, res: Response) => {
-  const { cartItems } = req.body; // Expecting cartItems from frontend
+  const { cartItems, address } = req.body; // Expecting cartItems and address from frontend
 
   if (!cartItems || cartItems.length === 0) {
     return res.status(400).json({ error: "No cart items provided" });
@@ -38,13 +38,19 @@ export const paymentController = async (req: Request, res: Response) => {
       };
     });
 
+    // Create the checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       line_items,
-      success_url: `${process.env.CLIENT_URL}/success`, // Redirect URL after success
-      cancel_url: `${process.env.CLIENT_URL}/cancel`, // Redirect URL after cancel
+      success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`, // Pass session_id to success page
+      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      shipping_address_collection: {
+        allowed_countries: ["US", "CA"],
+      },
     });
+
+
 
     // Return session URL and total amount
     res.json({ url: session.url, totalAmount });

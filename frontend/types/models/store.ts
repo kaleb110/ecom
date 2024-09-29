@@ -31,7 +31,9 @@ export interface Store {
     clerkUserId: string,
     status: string,
     totalAmount: number,
-    cartItems: CartItem[]
+    cartItems: CartItem[],
+
+    address: string
   ) => void;
   fetchOrders: (clerkUserId: string) => void;
   calculateTotalPrice: () => void;

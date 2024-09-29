@@ -1,44 +1,50 @@
 import { prisma } from "../config";
 import { CartItem } from "../types/cart";
 import { Order } from "../types/order";
-export const createOrder = async (orderData: Order) => {
-  const { clerkUserId, totalAmount, items, status } = orderData;
 
-  if (!clerkUserId || !totalAmount || !items || items.length === 0) {
+
+export const createOrder = async (orderData: any) => {
+  const { clerkUserId, totalAmount, items, status, address } = orderData;
+
+  if (
+    !clerkUserId ||
+    !totalAmount ||
+    !items ||
+    items.length === 0 ||
+    !address
+  ) {
     throw new Error("Missing order data");
   }
 
-  console.log("Order data received:", orderData); 
-
+  // Find the user by their Clerk ID
   const user = await prisma.user.findUnique({
     where: { clerkUserId },
   });
 
   if (!user) {
-    console.error("User not found for clerkUserId:", clerkUserId);
-    throw new Error("User Not Found!");
+    throw new Error("User not found");
   }
 
-  // Create the order first
+  // Create the order in the database
   const createdOrder = await prisma.order.create({
     data: {
       userId: user.id,
       totalAmount,
       status,
+      address,
     },
   });
 
-  // Create order items separately
-  const orderItems = items.map((item) => ({
+  // Create order items linked to the order
+  const orderItems = items.map((item: any) => ({
     quantity: item.quantity,
     price: item.price,
     orderId: createdOrder.id,
     productId: item.productId,
   }));
 
+  // Bulk create order items
   await prisma.orderItem.createMany({ data: orderItems });
-
-  console.log("Order created:", createdOrder); // Log the created order
 
   return createdOrder;
 };
@@ -60,4 +66,3 @@ export const getOrders = async (clerkUserId: string) => {
   console.log("Orders from database:", orders);
   return orders;
 };
-

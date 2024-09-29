@@ -211,9 +211,9 @@ const useProductStore = create<Store>((set, get) => ({
       });
   },
 
-  addOrder: async (clerkUserId, status, totalAmount, cartItems) => {
+  addOrder: async (clerkUserId, status, totalAmount, cartItems, sessionId) => {
     if (totalAmount <= 0) {
-      throw new Error("Total amount is zero, cannot create order."); // Throw an error for failure
+      throw new Error("Total amount is zero, cannot create order.");
     }
 
     try {
@@ -223,6 +223,7 @@ const useProductStore = create<Store>((set, get) => ({
         clerkUserId,
         totalAmount,
         status,
+        sessionId,
         items: cartItems.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -231,11 +232,10 @@ const useProductStore = create<Store>((set, get) => ({
       });
 
       if (response.data) {
-        // Handle successful order creation
         set((state) => ({
           orders: [...state.orders, response.data],
-          cartItems: [], // Clear cart items after order
-          totalAmount: 0, // Reset total amount
+          cartItems: [],
+          totalAmount: 0,
           isLoading: false,
         }));
       } else {
@@ -243,7 +243,7 @@ const useProductStore = create<Store>((set, get) => ({
       }
     } catch (error) {
       set({ error: "Failed to create order", isLoading: false });
-      throw error; // Re-throw the error so it can be caught in `useEffect`
+      throw error;
     }
   },
 

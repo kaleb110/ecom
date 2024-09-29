@@ -49,6 +49,7 @@ const Orders = () => {
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
+              <TableHead>Address</TableHead> {/* New Address Header */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,6 +66,8 @@ const Orders = () => {
                 <TableCell>
                   {format(new Date(order.createdAt), "MMM d, yyyy")}
                 </TableCell>
+                <TableCell>{order.address || "N/A"}</TableCell>{" "}
+                {/* New Address Column */}
               </TableRow>
             ))}
           </TableBody>
