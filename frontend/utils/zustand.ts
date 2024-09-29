@@ -12,10 +12,10 @@ const useProductStore = create<Store>((set, get) => ({
   orders: [],
   totalAmount: 0,
 
-  addProduct: async (product) => {
+  addProduct: async (product: Product) => {
     set({ isLoading: true, error: null });
     try {
-      console.log("Image URL before sending to backend:", product.imageUrl);
+      // Sending the product with the uploaded image URL to the backend
       const response = await axios.post(
         "http://localhost:5000/products/add",
         product
@@ -26,7 +26,6 @@ const useProductStore = create<Store>((set, get) => ({
       set({ isLoading: false, error: error.message });
     }
   },
-
   // Sign in the user on page load
   signInUser: async (userData) => {
     set({ isLoading: true });

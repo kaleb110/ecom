@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,14 +19,19 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import useProductStore from "@/utils/zustand";
+import { UploadButton } from "@/utils/uploadthing";
+import Image from "next/image";
+import { Product } from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters long"),
   price: z.number().min(0.01, "Price must be greater than 0"),
   stock: z.number().int().min(0, "Stock must be a non-negative integer"),
-  imageUrl: z.string().url("Must be a valid URL"),
   categories: z.array(z.number()).min(1, "Select at least one category"),
+  imageUrl: z.string().url("Image URL is required"),
 });
 
 const categories = [
@@ -45,18 +50,17 @@ const NewProductForm = () => {
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
-      stock: 0,
-      imageUrl: "",
+      price: undefined,
+      stock: undefined,
       categories: [],
+      imageUrl: "",
     },
   });
 
-  const onSubmit = async (product: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: Product) => {
     setIsSubmitting(true);
     try {
-      // Use the original input value for imageUrl without any modification
-      await addProduct(product);
+      await addProduct(data);
       form.reset();
     } catch (error) {
       console.error("Error adding product:", error);
@@ -77,6 +81,7 @@ const NewProductForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Product Name */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -96,20 +101,20 @@ const NewProductForm = () => {
                     </FormItem>
                   )}
                 />
-
+                {/* Description */}
                 <FormField
                   control={form.control}
-                  name="imageUrl"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-lg font-semibold">
-                        Image URL
+                        Description
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="https://example.com/image.jpg"
+                        <Textarea
+                          placeholder="Enter product description"
                           {...field}
-                          className="border-gray-300 text-black text-lg"
+                          className="border-gray-300 text-black text-lg min-h-[120px]"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -118,46 +123,33 @@ const NewProductForm = () => {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg font-semibold">
-                      Description
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter product description"
-                        {...field}
-                        className="border-gray-300 text-black text-lg min-h-[120px]"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Price */}
                 <FormField
                   control={form.control}
                   name="price"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-lg font-semibold">
-                        Price
+                        Price ($)
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="0.00"
                           {...field}
+                          value={field.value === undefined ? "" : field.value}
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(
-                              value === "" ? "" : parseFloat(value)
+                              value === "" ? undefined : parseFloat(value)
                             );
                           }}
+                          onFocus={(e) =>
+                            e.target.value === "0" && (e.target.value = "")
+                          }
+                          step="0.01"
+                          min="0"
                           className="border-gray-300 text-black text-lg"
                         />
                       </FormControl>
@@ -165,7 +157,7 @@ const NewProductForm = () => {
                     </FormItem>
                   )}
                 />
-
+                {/* Stock */}
                 <FormField
                   control={form.control}
                   name="stock"
@@ -179,12 +171,18 @@ const NewProductForm = () => {
                           type="number"
                           placeholder="0"
                           {...field}
+                          value={field.value === undefined ? "" : field.value}
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(
-                              value === "" ? "" : parseInt(value, 10)
+                              value === "" ? undefined : parseInt(value, 10)
                             );
                           }}
+                          onFocus={(e) =>
+                            e.target.value === "0" && (e.target.value = "")
+                          }
+                          min="0"
+                          step="1"
                           className="border-gray-300 text-black text-lg"
                         />
                       </FormControl>
@@ -194,6 +192,7 @@ const NewProductForm = () => {
                 />
               </div>
 
+              {/* Categories */}
               <FormField
                 control={form.control}
                 name="categories"
@@ -202,7 +201,7 @@ const NewProductForm = () => {
                     <FormLabel className="text-lg font-semibold">
                       Categories
                     </FormLabel>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                       {categories.map((category) => (
                         <div
                           key={category.id}
@@ -243,25 +242,82 @@ const NewProductForm = () => {
                 )}
               />
 
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  className="w-full bg-black hover:bg-gray-800 text-white text-lg py-6"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Adding Product...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-5 w-5" />
-                      Add Product
-                    </>
-                  )}
-                </Button>
-              </div>
+              {/* Upload Image */}
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-lg font-semibold">
+                      Upload Image
+                    </FormLabel>
+                    <FormControl>
+                      <div className="mt-2">
+                        {!field.value ? (
+                          <UploadButton
+                            endpoint="imageUploader"
+                            onClientUploadComplete={(res) => {
+                              // Log the response to see the URL
+                              console.log("Upload response:", res);
+
+                              // Access the URL directly from serverData
+                              const imageUrl = res?.[0]?.serverData.url || "";
+                              console.log("Image URL:", imageUrl); // Log the raw URL
+
+                              // Set the raw URL (without decoding) to the form field
+                              field.onChange(imageUrl);
+                            }}
+                            onUploadError={(error: Error) => {
+                              console.error("Upload error:", error);
+                            }}
+                          />
+                        ) : (
+                          <div className="relative mt-4">
+                            <Image
+                              src={field.value}
+                              alt="Uploaded product image"
+                              width={200}
+                              height={200}
+                              className="rounded-md"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-2 -right-2"
+                              onClick={() => {
+                                console.log("Removing image"); // Debugging removal
+                                field.onChange(""); // Clear the image
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-red-500" />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full bg-black hover:bg-gray-800 text-white text-lg py-6"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Adding Product...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-5 w-5" />
+                    Add Product
+                  </>
+                )}
+              </Button>
             </form>
           </Form>
         </CardContent>

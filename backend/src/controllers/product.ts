@@ -51,13 +51,20 @@ export const getProductsController = async (req: Request, res: Response) => {
 export const addProductController = async (req: Request, res: Response) => {
   try {
     const product: Product = { ...req.body };
-    console.log("Received image URL on backend:", product.imageUrl); // Should log the full URL with query parameters
 
-    await addProduct(product);
+    // Decode the image URL if necessary
+    const decodedImageUrl = product.imageUrl.replace(/&#x2F;/g, "/");
+    console.log("Image URL:", decodedImageUrl);
+
+    // Continue with the rest of your logic
+    await addProduct({ ...product, imageUrl: decodedImageUrl });
+
     res.status(201).json({ message: "Product added successfully!" });
   } catch (error) {
-    console.error("Error happened:", error);
+    console.error("Error in adding product:", error);
     res.status(500).json({ message: "Cannot add product!" });
   }
 };
+
+
 
