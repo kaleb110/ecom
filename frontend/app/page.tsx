@@ -1,6 +1,5 @@
 "use client"
 import { ProductCardComponent } from "@/components/product-card";
-import { EcomNavbarComponent } from "@/components/ecom-navbar";
 import { SignedOut, SignInButton, SignedIn } from "@clerk/nextjs";
 const Home = () => {
   return (
@@ -9,7 +8,6 @@ const Home = () => {
         <SignInButton />
       </SignedOut>
       <SignedIn>
-        <EcomNavbarComponent />
         <ProductCardComponent />
       </SignedIn>
     </div>

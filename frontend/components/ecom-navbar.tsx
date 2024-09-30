@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Cart from "@/app/cart/page";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,8 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
 import { User } from "@/types";
+import Link from "next/link";
+
 const categories = [
   { value: "all", label: "All Categories" },
   { value: "electronics", label: "Electronics" },
@@ -30,19 +32,17 @@ export function EcomNavbarComponent() {
   const { signInUser } = useProductStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
-  const { user, isLoaded } = useUser(); // Now this hook is inside a valid React component
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
     if (isLoaded && user) {
-      const clerkUserId = user.id; // Clerk user ID
+      const clerkUserId = user.id;
 
-      // Extract email, prioritizing primaryEmailAddress and fallback to others if necessary
       let email = user.primaryEmailAddress?.emailAddress || null;
       if (!email && user.emailAddresses?.length > 0) {
         email = user.emailAddresses[0]?.emailAddress;
       }
 
-      // Extract name, fallback to "Unknown User" if not available
       let name =
         user.fullName ||
         `${user.firstName || ""} ${user.lastName || ""}`.trim();
@@ -51,14 +51,12 @@ export function EcomNavbarComponent() {
         name = "Unknown User";
       }
 
-      // Proceed only if we have a valid email
       if (!email || typeof email !== "string") {
         console.error("Invalid email:", email);
         return;
       }
 
       const userData: User = { clerkUserId, email, name };
-      // Sync user with the backend
       signInUser(userData);
     }
   }, [user, isLoaded, signInUser]);
@@ -68,9 +66,9 @@ export function EcomNavbarComponent() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
+          <Link href="/" className="flex-shrink-0 flex items-center">
             <span className="text-2xl font-bold text-primary">ecom</span>
-          </div>
+          </Link>
 
           {/* Search bar - hidden on mobile, visible on larger screens */}
           <div className="hidden md:flex flex-1 max-w-3xl mx-4">
@@ -110,7 +108,7 @@ export function EcomNavbarComponent() {
             </div>
           </div>
           <div className="flex items-center justify-center gap-4">
-            {/* account */}
+            {/* Account */}
             <div>
               <SignedOut>
                 <SignInButton />
@@ -119,6 +117,14 @@ export function EcomNavbarComponent() {
                 <UserButton />
               </SignedIn>
             </div>
+
+            {/* Dashboard icon */}
+            <Link href="/dashboard" passHref>
+              <Button variant="ghost" size="icon" className="relative">
+                <LayoutDashboard className="h-6 w-6" />
+                <span className="sr-only">Dashboard</span>
+              </Button>
+            </Link>
 
             {/* Cart button */}
             <Cart />

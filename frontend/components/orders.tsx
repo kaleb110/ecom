@@ -56,47 +56,23 @@ const Orders = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>
-                  <Skeleton className="h-4 w-full" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-full" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-full" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-full" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-full" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-full" />
-                </TableHead>
+                <TableHead><Skeleton className="h-4 w-full" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-full" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-full" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-full" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-full" /></TableHead>
+                <TableHead><Skeleton className="h-4 w-full" /></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {[...Array(10)].map((_, index) => (
                 <TableRow key={index}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-full" /></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -157,9 +133,7 @@ const Orders = () => {
                         <Eye className="mr-2 h-4 w-4" />
                         <span>View Order</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => console.log("View receipt", order.id)}
-                      >
+                      <DropdownMenuItem onClick={() => console.log("View receipt", order.id)}>
                         <FileText className="mr-2 h-4 w-4" />
                         <span>View Receipt</span>
                       </DropdownMenuItem>
@@ -172,22 +146,16 @@ const Orders = () => {
         </Table>
       </div>
 
-      <Dialog
-        open={!!selectedOrder}
-        onOpenChange={() => setSelectedOrder(null)}
-      >
+      <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
           </DialogHeader>
           {selectedOrder && (
             <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2">
-                Order #{selectedOrder.id}
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">Order #{selectedOrder.id}</h3>
               <p className="text-sm text-gray-500 mb-4">
-                Placed on{" "}
-                {format(new Date(selectedOrder.createdAt), "MMM d, yyyy")}
+                Placed on {format(new Date(selectedOrder.createdAt), "MMM d, yyyy")}
               </p>
               <div className="space-y-4">
                 {selectedOrder.products.map((product: Product) => (
@@ -216,9 +184,7 @@ const Orders = () => {
                 ))}
               </div>
               <div className="mt-6 pt-4 border-t border-gray-200">
-                <p className="text-sm font-medium">
-                  Total: ${selectedOrder.totalAmount.toFixed(2)}
-                </p>
+                <p className="text-sm font-medium">Total: ${selectedOrder.totalAmount.toFixed(2)}</p>
               </div>
             </div>
           )}
