@@ -1,5 +1,5 @@
 // products
-import { getProducts, addProduct, getSingleProduct } from "../services/product";
+import { getProducts, addProduct, getSingleProduct, deleteProduct } from "../services/product";
 import { Request, Response } from "express";
 import { Product } from "../types/product";
 
@@ -66,5 +66,16 @@ export const addProductController = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteProductController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  
+  try {
+    await deleteProduct(Number(id))
 
+    res.status(200).json({message: "Product Deleted Successfuly !"})
+  } catch (error) {
+    console.error("Error Can Not Delete Product !", error)
+    res.status(500).json({message: "Can Not Delete Product !"})
+  }
+}
 

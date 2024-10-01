@@ -53,3 +53,11 @@ export const addProduct = async (product: Product) => {
   });
 };
 
+export const deleteProduct = async (id: number) => {
+
+  return await prisma.product.delete({
+    where: {
+      id: id,
+    },
+  });
+};

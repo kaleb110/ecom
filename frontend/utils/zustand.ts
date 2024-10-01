@@ -58,6 +58,17 @@ const useProductStore = create<Store>((set, get) => ({
     }
   },
 
+  deleteProduct: async (productid: number) => {
+    set({ isLoading: true, error: null })
+    try {
+      await axios.delete(`http://localhost:5000/products/${productid}`)
+      set({isLoading: false})
+    } catch (error) {
+      console.error("Error deleting product !", error)
+      set({isLoading: false, error: "Error deleting product !"})
+    }
+  },
+
   // Calculate the total price of the cart items
   calculateTotalPrice: () => {
     const { cartItems } = get();

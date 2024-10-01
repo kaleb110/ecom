@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  PlusCircle,
-  Package,
-  ShoppingCart,
-  BarChart,
-} from "lucide-react";
+import { PlusCircle, Package, ShoppingCart, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import NewProductForm from "@/app/addproduct/page";

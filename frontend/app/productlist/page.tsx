@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
-import { useUser } from "@clerk/nextjs";
 import {
   Table,
   TableBody,
@@ -24,30 +23,28 @@ import useProductStore from "@/utils/zustand";
 import { Product } from "@/types";
 
 export default function ProductsPage() {
-  const { user } = useUser();
-  const { products, fetchProducts, deleteProduct } = useProductStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const { products, fetchProducts, deleteProduct, isLoading } =
+    useProductStore();
 
   useEffect(() => {
-    if (user) {
-      fetchProducts()
-        .then(() => setIsLoading(false))
-        .catch((error) => {
-          console.error("Error fetching products:", error);
-          setIsLoading(false);
-        });
-    }
-  }, [user, fetchProducts]);
+    const fetchProductsFunc = async () => {
+      try {
+        await fetchProducts();
+      } catch (error) {
+        console.error("Error fetching products", error);
+      }
+    };
 
-  const handleEdit = (productId: string) => {
+    fetchProductsFunc()
+  }, [fetchProducts]);
+
+  const handleEdit = (productId: number) => {
     console.log(`Edit product with id: ${productId}`);
     // Implement edit functionality
   };
 
-  const handleDelete = (productId: string) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      deleteProduct(productId);
-    }
+  const handleDelete = async (productId: number) => {
+    await deleteProduct(productId);
   };
 
   if (isLoading) {
@@ -74,7 +71,7 @@ export default function ProductsPage() {
                 <TableCell className="font-medium">{product.id}</TableCell>
                 <TableCell>
                   <Image
-                    src={product.imageUrl}
+                    src={product.imageUrl || ""}
                     alt={product.name}
                     width={50}
                     height={50}

@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@clerk/nextjs";
 import useProductStore from "@/utils/zustand";
-import { Order, Product } from "@/types";
+import { Order, OrderItem } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, FileText, X } from "lucide-react";
+import { MoreHorizontal, Eye, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,13 +34,19 @@ import Image from "next/image";
 const Orders = () => {
   const { user, isLoaded } = useUser();
   const { orders, fetchOrders, isLoading, error } = useProductStore();
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     if (isLoaded && user?.id) {
-      console.log("User ID:", user.id);
-      fetchOrders(user.id).finally(() => setIsInitialLoading(false));
+      const fetchOrdersFunc = async () => {
+        try {
+          await fetchOrders(user.id);
+        } catch (error) {
+          console.error("Error fetching products", error);
+        }
+      };
+
+      fetchOrdersFunc();
     }
   }, [isLoaded, user, fetchOrders]);
 
@@ -48,7 +54,7 @@ const Orders = () => {
     setSelectedOrder(order);
   };
 
-  if (isInitialLoading || isLoading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 min-h-screen">
         <Skeleton className="w-1/4 h-8 mb-8" />
@@ -190,26 +196,27 @@ const Orders = () => {
                 {format(new Date(selectedOrder.createdAt), "MMM d, yyyy")}
               </p>
               <div className="space-y-4">
-                {selectedOrder.products.map((product: Product) => (
-                  <div key={product.id} className="flex items-center space-x-4">
+                {selectedOrder.items.map((item: OrderItem) => (
+                  <div key={item.id} className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
+                  
                       <Image
-                        src={product.imageUrl}
-                        alt={product.name}
+                        src={item.product.imageUrl || ""}
+                        alt={item.product.name}
                         width={50}
                         height={50}
                         className="rounded-md"
                       />
                     </div>
                     <div className="flex-grow">
-                      <h4 className="text-sm font-medium">{product.name}</h4>
+                      <h4 className="text-sm font-medium">{item.product.name}</h4>
                       <p className="text-sm text-gray-500">
-                        ${product.price.toFixed(2)} x {product.quantity}
+                        ${item.price.toFixed(2)} x {item.quantity}
                       </p>
                     </div>
                     <div className="flex-shrink-0">
                       <p className="text-sm font-medium">
-                        ${(product.price * product.quantity).toFixed(2)}
+                        ${(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import {
   getProductsController,
   addProductController,
   getSingleProductController,
+  deleteProductController
 } from "../controllers/product";
 import {
   addProductToCartController,
@@ -27,6 +28,7 @@ const router = Router();
 router.get("/products", getProductsController);
 // router.get("/products/search", searchProductsController);
 router.get("/products/:id", getSingleProductController);
+router.delete("/products/:id", deleteProductController)
 router.post(
   "/products/add",
   addProductValidator,

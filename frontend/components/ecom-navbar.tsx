@@ -1,6 +1,5 @@
-"use client";
-
-import { useState, useEffect } from "react";
+"use client"; // Ensure this is at the top
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +18,7 @@ import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
 import { User } from "@/types";
 import Link from "next/link";
+import useAlgolia from "@/utils/algolia"; // Ensure this imports your custom hook
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -30,14 +30,16 @@ const categories = [
 
 export function EcomNavbarComponent() {
   const { signInUser } = useProductStore();
+  const { searchProducts } = useAlgolia(); // Get the search function from the hook
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isLoaded } = useUser();
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     if (isLoaded && user) {
       const clerkUserId = user.id;
-
       let email = user.primaryEmailAddress?.emailAddress || null;
       if (!email && user.emailAddresses?.length > 0) {
         email = user.emailAddresses[0]?.emailAddress;
@@ -61,6 +63,16 @@ export function EcomNavbarComponent() {
     }
   }, [user, isLoaded, signInUser]);
 
+  // Handle the search input and trigger Algolia search
+  const handleSearch = async () => {
+    if (query.trim() !== "") {
+      const results = await searchProducts(query); // Use the search function from the hook
+      setSearchResults(results);
+    } else {
+      setSearchResults([]); // Clear results if query is empty
+    }
+  };
+
   return (
     <nav className="bg-white shadow sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -70,7 +82,7 @@ export function EcomNavbarComponent() {
             <span className="text-2xl font-bold text-primary">ecom</span>
           </Link>
 
-          {/* Search bar - hidden on mobile, visible on larger screens */}
+          {/* Search bar */}
           <div className="hidden md:flex flex-1 max-w-3xl mx-4">
             <div
               className={cn(
@@ -94,21 +106,30 @@ export function EcomNavbarComponent() {
                 type="text"
                 placeholder="Search products..."
                 className="pl-[140px] pr-[90px] h-10 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch(); // Trigger search on Enter key
+                  }
+                }}
               />
               <Button
                 size="sm"
                 variant="ghost"
                 className="absolute right-0 top-0 bottom-0 rounded-r-md px-3 h-10 hover:bg-gray-200 transition-colors"
+                onClick={handleSearch} // Use handleSearch for button click
               >
                 <Search className="h-4 w-4" />
                 <span className="sr-only">Search</span>
               </Button>
             </div>
           </div>
+
+          {/* Account */}
           <div className="flex items-center justify-center gap-4">
-            {/* Account */}
             <div>
               <SignedOut>
                 <SignInButton />
@@ -149,51 +170,38 @@ export function EcomNavbarComponent() {
           </div>
         </div>
 
-        {/* Mobile menu, show/hide based on menu state */}
+        {/* Mobile menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden py-4"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden"
             >
-              <div className="flex flex-col space-y-4">
-                <div className="relative bg-gray-100 rounded-md">
-                  <Select>
-                    <SelectTrigger className="w-full border-0 bg-transparent focus:ring-0">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative bg-gray-100 rounded-md">
-                  <Input
-                    type="text"
-                    placeholder="Search products..."
-                    className="pr-[90px] h-10 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="absolute right-0 top-0 bottom-0 rounded-r-md px-3 h-10 hover:bg-gray-200 transition-colors"
-                  >
-                    <Search className="h-4 w-4" />
-                    <span className="sr-only">Search</span>
-                  </Button>
-                </div>
-              </div>
+              {/* Add mobile menu items here */}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Render search results */}
+      {searchResults.length > 0 && (
+        <div className="absolute bg-white border border-gray-300 w-full mt-1 z-10">
+          <ul>
+            {searchResults.map((product) => (
+              <li key={product.objectID} className="p-2 hover:bg-gray-100">
+                <Link href={`/product/${product.objectID}`}>
+                  {product.name} - ${product.price}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </nav>
   );
 }
+
+export default EcomNavbarComponent;

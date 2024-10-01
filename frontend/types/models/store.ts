@@ -16,7 +16,8 @@ export interface Store {
     productId: number,
     quantity: number
   ) => void;
-  fetchProducts: () => void;
+  fetchProducts: () => Promise<Product[]>;
+  deleteProduct: (productid: number) => void;
   fetchCartItems: (clerkUserId: string) => void;
   removeFromCartOptimistic: (cartId: number, productId: number) => void;
   proceedToCheckout: () => void;
