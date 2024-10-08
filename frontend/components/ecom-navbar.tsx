@@ -18,7 +18,7 @@ import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
 import { User } from "@/types";
 import Link from "next/link";
-import useAlgolia from "@/utils/algolia"; // Ensure this imports your custom hook
+import useAlgolia from "@/hooks/useAlgolia";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -30,12 +30,13 @@ const categories = [
 
 export function EcomNavbarComponent() {
   const { signInUser } = useProductStore();
-  const { searchProducts } = useAlgolia(); // Get the search function from the hook
+  const { searchProducts } = useAlgolia(); 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isLoaded } = useUser();
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isAdmin, setisAdmin] = useState(false)
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -60,6 +61,11 @@ export function EcomNavbarComponent() {
 
       const userData: User = { clerkUserId, email, name };
       signInUser(userData);
+
+      // Check if the user is an admin based on the role
+      if (user.publicMetadata && user.publicMetadata.role === "admin") {
+        setisAdmin(true);
+      }
     }
   }, [user, isLoaded, signInUser]);
 
@@ -140,12 +146,13 @@ export function EcomNavbarComponent() {
             </div>
 
             {/* Dashboard icon */}
-            <Link href="/dashboard" passHref>
+            {isAdmin && <Link href="/dashboard" passHref>
               <Button variant="ghost" size="icon" className="relative">
                 <LayoutDashboard className="h-6 w-6" />
                 <span className="sr-only">Dashboard</span>
               </Button>
-            </Link>
+            </Link>}
+            
 
             {/* Cart button */}
             <Cart />
@@ -190,7 +197,7 @@ export function EcomNavbarComponent() {
       {searchResults.length > 0 && (
         <div className="absolute bg-white border border-gray-300 w-full mt-1 z-10">
           <ul>
-            {searchResults.map((product) => (
+            {searchResults.map((product: any) => (
               <li key={product.objectID} className="p-2 hover:bg-gray-100">
                 <Link href={`/product/${product.objectID}`}>
                   {product.name} - ${product.price}

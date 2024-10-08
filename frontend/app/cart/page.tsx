@@ -32,11 +32,12 @@ const Cart = () => {
 
   const { user, isLoaded } = useUser();
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetchCartItems(user.id);
-    }
-  }, [isLoaded, user, fetchCartItems]);
+useEffect(() => {
+  if (isLoaded && user) {
+    fetchCartItems(user.id);
+  }
+}, [isLoaded, user, fetchCartItems]);
+
 
   const cartArray = Array.isArray(cartItems) ? cartItems : [];
 

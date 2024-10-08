@@ -10,14 +10,14 @@ export const addProductToCart = async (cartItem: Cart) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("User not found"); // This error can be logged as needed
   }
 
   // Create or fetch the user's cart
   const cart = await prisma.cart.upsert({
     where: { userId: user.id },
     update: {},
-    create: { userId: user.id },
+    create: { userId: user.id }, // Create a new cart if it doesn't exist
   });
 
   // Check if the product already exists in the cart
@@ -64,8 +64,8 @@ export const getCartItems = async (clerkUserId: string) => {
       throw new Error("User not found");
     }
 
-    // Fetch the cart items using userId
-    return await prisma.cart.findUnique({
+    // Fetch the cart
+    const cart = await prisma.cart.findUnique({
       where: { userId: user.id },
       include: {
         items: {
@@ -75,11 +75,20 @@ export const getCartItems = async (clerkUserId: string) => {
         },
       },
     });
+
+    // Check if the cart exists; if not, return an empty cart
+    if (!cart) {
+      return { items: [] }; // Return an empty array for items
+    }
+
+    return cart; // Return the found cart with items
   } catch (error: any) {
     console.error("Error fetching cart items:", error.message);
     throw error; // Re-throw to handle in controller
   }
 };
+
+
 
 export const deleteCartItem = async (cartItemId: number) => {
   return await prisma.cartItem.delete({

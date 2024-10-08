@@ -40,18 +40,23 @@ export const updateCartItemController = async (req: Request, res: Response) => {
 export const getCartItemsController = async (req: Request, res: Response) => {
   const { clerkUserId } = req.params;
 
+  console.log("Entering getCartItemsController with clerkUserId:", clerkUserId);
+
   try {
     if (!clerkUserId) {
       return res.status(400).json({ error: "Missing clerkUserId" });
     }
 
     const cartItems = await getCartItems(clerkUserId);
+    console.log("Fetched cart items:", cartItems);
     res.status(200).json(cartItems);
   } catch (error: any) {
     console.error("Error fetching cart items:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 export const deleteCartItemController = async (req: Request, res: Response) => {
   const { cartId }: any = req.params;

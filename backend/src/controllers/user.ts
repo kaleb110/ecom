@@ -2,6 +2,7 @@ import { getUser, createUser } from "../services/user";
 import { Request, Response } from "express";
 import { User } from "../types/user";
 
+// User Controller
 export const addUserController = async (req: Request, res: Response) => {
   try {
     const { clerkUserId, email, name }: User = req.body;
@@ -10,6 +11,7 @@ export const addUserController = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // Check if the user already exists
     const existingUser = await getUser(clerkUserId);
 
     if (!existingUser) {
@@ -30,3 +32,5 @@ export const addUserController = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+

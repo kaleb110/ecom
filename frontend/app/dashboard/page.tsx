@@ -88,7 +88,10 @@ const DashboardPage = () => {
   );
 };
 
-const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
+const AnalyticsContent = ({
+  revenueTimeframe,
+  setRevenueTimeframe,
+}) => {
   const salesData = [
     { customer: "John Doe", item: "Product A", price: 50, quantity: 2 },
     { customer: "Jane Smith", item: "Product B", price: 30, quantity: 3 },
