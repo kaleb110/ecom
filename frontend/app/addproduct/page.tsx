@@ -70,7 +70,7 @@ const NewProductForm = () => {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-12">
+    <div className="container max-w-4xl mx-auto px-4 pb-12">
       <Card className="bg-white text-black shadow-xl">
         <CardHeader className="pb-8 pt-10">
           <CardTitle className="text-4xl font-bold text-center">

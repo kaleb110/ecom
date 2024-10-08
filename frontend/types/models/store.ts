@@ -9,6 +9,8 @@ export interface Store {
   error: string | null;
   totalAmount: number;
   orders: any;
+  category: string;
+  chooseCategory: (category: string) => void;
   addProduct: (product: Product) => void;
   signInUser: (userData: User) => void;
   updateCartItemOptimistic: (

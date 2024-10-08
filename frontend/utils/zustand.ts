@@ -11,6 +11,11 @@ const useProductStore = create<Store>((set, get) => ({
   error: null,
   orders: [],
   totalAmount: 0,
+  category: "all",
+
+  chooseCategory: (category: string) => {
+    set({category: category})
+  },
 
   addProduct: async (product: Product) => {
     set({ isLoading: true, error: null });

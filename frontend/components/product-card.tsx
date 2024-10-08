@@ -4,24 +4,27 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star } from "lucide-react";
 import useProductStore from "@/utils/zustand";
+
 export function ProductCardComponent() {
-  const { products, error, isLoading, fetchProducts } = useProductStore();
+  const { products, error, isLoading, fetchProducts, category } =
+    useProductStore();
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Filter products by category
+  const filteredProducts =
+    category === "all"
+      ? products
+      : products.filter(
+          (product) => product.categories.some((cat) => cat.name === category) // Adjusted to check if any category matches
+        );
 
   if (isLoading) {
     return (
@@ -37,9 +40,6 @@ export function ProductCardComponent() {
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full mt-2" />
             </CardContent>
-            <CardFooter className="p-4">
-              <Skeleton className="h-10 w-full" />
-            </CardFooter>
           </Card>
         ))}
       </div>
@@ -56,7 +56,7 @@ export function ProductCardComponent() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-      {products.map((product) => {
+      {filteredProducts.map((product) => {
         const { id, name, price, description, imageUrl, categories } = product;
         const rating = 4; // Default rating if not provided
 
@@ -69,16 +69,14 @@ export function ProductCardComponent() {
           >
             <Link href={`/products/${id}`}>
               <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105">
-                <div className="relative aspect-w-16 aspect-h-9">
+                <div className="relative h-48 overflow-hidden">
                   <Image
-                    src={imageUrl ||""}
+                    src={imageUrl || ""}
                     alt={name}
+                    layout="fill"
                     objectFit="cover"
-                    className="rounded-t-lg w-full"
-                    width={400}
-                    height={400}
+                    className="rounded-t-lg"
                   />
-                  {/* Display Categories as Badges */}
                   <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                     {categories.length > 0 ? (
                       categories.map((category) => (
@@ -94,17 +92,20 @@ export function ProductCardComponent() {
                     )}
                   </div>
                 </div>
-                <CardHeader className="p-4">
-                  <CardTitle className="text-lg font-semibold line-clamp-1">
-                    {name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center mb-2">
+                <div className="flex flex-col p-4 space-y-3">
+                  <CardHeader className="p-0">
+                    <CardTitle className="text-lg font-semibold line-clamp-1">
+                      {name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0 flex flex-col space-y-2">
                     <div className="text-2xl font-bold text-primary">
                       ${price.toFixed(2)}
                     </div>
-                    <div className="flex items-center">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {description}
+                    </p>
+                    <div className="flex items-center space-x-1">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
@@ -115,20 +116,12 @@ export function ProductCardComponent() {
                           }`}
                         />
                       ))}
-                      <span className="ml-1 text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground ml-1">
                         ({rating.toFixed(1)})
                       </span>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {description}
-                  </p>
-                </CardContent>
-                <CardFooter className="p-4">
-                  <Button className="w-full" size="sm">
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-                  </Button>
-                </CardFooter>
+                  </CardContent>
+                </div>
               </Card>
             </Link>
           </motion.div>
