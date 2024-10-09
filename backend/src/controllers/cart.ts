@@ -74,10 +74,10 @@ export const removeProductFromCartController = async (
   req: Request,
   res: Response
 ) => {
-  const cartItem: CartItem = {...req.params};
+  const { cartId, productId }: CartItem = req.params
 
   try {
-    await removeProductFromCart(cartItem); // Ensure both values are numbers
+    await removeProductFromCart({ cartId, productId }); // Ensure both values are numbers
     res.status(200).json({ message: "Product removed from cart" });
   } catch (error) {
     console.error("Error removing product from cart:", error);

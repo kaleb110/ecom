@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createOrder, getOrders } from "../services/order";
+import { createOrder, getOrders, getLatestOrders } from "../services/order";
 import { Order } from "../types/order";
 import Stripe from "stripe";
 
@@ -66,6 +66,23 @@ export const getOrdersByUserController = async (
     }
 
     const orders = await getOrders(clerkUserId);
+
+    console.log("Orders fetched:", orders);
+    res.status(200).json(orders);
+  } catch (error: any) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: error.message || "Failed to fetch orders" });
+  }
+};
+
+export const getLatestOrdersController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    console.log("Fetching Latest orders");
+
+    const orders = await getLatestOrders();
 
     console.log("Orders fetched:", orders);
     res.status(200).json(orders);

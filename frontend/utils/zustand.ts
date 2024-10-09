@@ -10,11 +10,12 @@ const useProductStore = create<Store>((set, get) => ({
   isLoading: false,
   error: null,
   orders: [],
+  sales: [],
   totalAmount: 0,
   category: "all",
 
   chooseCategory: (category: string) => {
-    set({category: category})
+    set({ category: category });
   },
 
   addProduct: async (product: Product) => {
@@ -64,13 +65,13 @@ const useProductStore = create<Store>((set, get) => ({
   },
 
   deleteProduct: async (productid: number) => {
-    set({ isLoading: true, error: null })
+    set({ isLoading: true, error: null });
     try {
-      await axios.delete(`http://localhost:5000/products/${productid}`)
-      set({isLoading: false})
+      await axios.delete(`http://localhost:5000/products/${productid}`);
+      set({ isLoading: false });
     } catch (error) {
-      console.error("Error deleting product !", error)
-      set({isLoading: false, error: "Error deleting product !"})
+      console.error("Error deleting product !", error);
+      set({ isLoading: false, error: "Error deleting product !" });
     }
   },
 
@@ -185,11 +186,19 @@ const useProductStore = create<Store>((set, get) => ({
 
   // Optimistically update cart item quantity
   updateCartItemOptimistic: (cartId, productId, quantity) => {
-    set((state) => ({
-      cartItems: state.cartItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity: quantity } : item
-      ),
-    }));
+    set((state) => {
+      const existingItem = state.cartItems.find(
+        (item) => item.product.id === productId
+      );
+
+      if (!existingItem) return state; // If item does not exist, do nothing
+
+      return {
+        cartItems: state.cartItems.map((item) =>
+          item.product.id === productId ? { ...item, quantity } : item
+        ),
+      };
+    });
 
     // Make API call to persist the update
     axios
@@ -204,16 +213,25 @@ const useProductStore = create<Store>((set, get) => ({
       .catch((error) => {
         console.error("Failed to update cart item:", error);
         // Handle failure and rollback the optimistic update here
+        // You may want to revert the quantity back to the previous state
       });
   },
 
   // Optimistically remove an item from the cart
   removeFromCartOptimistic: (cartId, productId) => {
-    set((state) => ({
-      cartItems: state.cartItems.filter(
-        (item) => item.product.id !== productId
-      ),
-    }));
+    set((state) => {
+      const existingItem = state.cartItems.find(
+        (item) => item.product.id === productId
+      );
+
+      if (!existingItem) return state; // If item does not exist, do nothing
+
+      return {
+        cartItems: state.cartItems.filter(
+          (item) => item.product.id !== productId
+        ),
+      };
+    });
 
     // Make the API call to remove the item from the server
     axios
@@ -224,6 +242,7 @@ const useProductStore = create<Store>((set, get) => ({
       .catch((error) => {
         console.error("Failed to remove item from cart:", error);
         // Optionally handle failure and rollback the optimistic removal here
+        // You might want to re-add the item back to the cart state if it fails
       });
   },
 
@@ -284,6 +303,16 @@ const useProductStore = create<Store>((set, get) => ({
     } catch (error) {
       console.error("Failed to fetch orders:", error);
       set({ error: "Failed to fetch orders", isLoading: false });
+    }
+  },
+  fetchLatestSales: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get("http://localhost:5000/sales");
+      set({ sales: response.data, isLoading: false });
+    } catch (error) {
+      console.error("Failed to fetch sales:", error);
+      set({ error: "Failed to fetch sales", isLoading: false });
     }
   },
 }));

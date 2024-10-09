@@ -199,7 +199,6 @@ const Orders = () => {
                 {selectedOrder.items.map((item: OrderItem) => (
                   <div key={item.id} className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                  
                       <Image
                         src={item.product.imageUrl || ""}
                         alt={item.product.name}
@@ -209,7 +208,9 @@ const Orders = () => {
                       />
                     </div>
                     <div className="flex-grow">
-                      <h4 className="text-sm font-medium">{item.product.name}</h4>
+                      <h4 className="text-sm font-medium">
+                        {item.product.name}
+                      </h4>
                       <p className="text-sm text-gray-500">
                         ${item.price.toFixed(2)} x {item.quantity}
                       </p>

@@ -1,0 +1,15 @@
+Add analytic page data
+Add real rating to the product
+Add navigation show for each product like product > name 
+
+Improve dashboard ui
+Improve product card ui
+
+If all completed create a sign up page for the commerce app
+
+fix order page and sucess page after payment
+fix cart item display/add
+
+to be removed
+
+- remove delete product

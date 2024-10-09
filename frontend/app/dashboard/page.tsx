@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusCircle, Package, ShoppingCart, BarChart } from "lucide-react";
+import { PlusCircle, Package, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import NewProductForm from "@/app/addproduct/page";
@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -26,6 +26,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import ProductsPage from "../productlist/page";
+import useProductStore from "@/utils/zustand";
 
 const navItems = [
   { id: "create", label: "Create", icon: PlusCircle },
@@ -62,61 +63,113 @@ const DashboardPage = () => {
           </div>
         </div>
       </nav>
-      <main className="flex-1 p-8 overflow-auto">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="h-full"
-          >
-            {activeTab === "create" && <NewProductForm />}
-            {activeTab === "products" && <ProductsPage />}
-            {activeTab === "orders" && <Orders />}
-            {activeTab === "analytics" && (
-              <AnalyticsContent
-                revenueTimeframe={revenueTimeframe}
-                setRevenueTimeframe={setRevenueTimeframe}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+      <main className="flex-1 overflow-auto">
+        <div className="container mx-auto px-4 py-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeTab === "create" && <NewProductForm />}
+              {activeTab === "products" && <ProductsPage />}
+              {activeTab === "orders" && <Orders />}
+              {activeTab === "analytics" && (
+                <AnalyticsContent
+                  revenueTimeframe={revenueTimeframe}
+                  setRevenueTimeframe={setRevenueTimeframe}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
     </div>
   );
 };
 
-const AnalyticsContent = ({
-  revenueTimeframe,
-  setRevenueTimeframe,
-}) => {
-  const salesData = [
-    { customer: "John Doe", item: "Product A", price: 50, quantity: 2 },
-    { customer: "Jane Smith", item: "Product B", price: 30, quantity: 3 },
-    { customer: "Bob Johnson", item: "Product C", price: 75, quantity: 1 },
-    { customer: "Alice Brown", item: "Product A", price: 50, quantity: 1 },
-    { customer: "Charlie Davis", item: "Product D", price: 100, quantity: 2 },
-  ];
+const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
+  const { fetchLatestSales, sales, isLoading, error } = useProductStore();
+
+  // Function to initialize revenue data for the week and month
+  const initializeRevenueData = (timeframe) => {
+    if (timeframe === "week") {
+      return [
+        { name: "Mon", revenue: 0 },
+        { name: "Tue", revenue: 0 },
+        { name: "Wed", revenue: 0 },
+        { name: "Thu", revenue: 0 },
+        { name: "Fri", revenue: 0 },
+        { name: "Sat", revenue: 0 },
+        { name: "Sun", revenue: 0 },
+      ];
+    } else if (timeframe === "month") {
+      return [
+        { name: "Week 1", revenue: 0 },
+        { name: "Week 2", revenue: 0 },
+        { name: "Week 3", revenue: 0 },
+        { name: "Week 4", revenue: 0 },
+        { name: "Week 5", revenue: 0 }, // Handle cases for months with more than 4 weeks
+      ];
+    }
+    return [];
+  };
+
+  // Function to calculate revenue based on sales data
+  const calculateRevenue = (timeframe) => {
+    const revenueData = initializeRevenueData(timeframe);
+
+    sales.forEach((sale) => {
+      const totalRevenue = sale.items.reduce((total, item) => {
+        return total + item.price * item.quantity;
+      }, 0);
+
+      const date = new Date(sale.createdAt);
+      if (timeframe === "week") {
+        const dayName = date.toLocaleString("en-US", { weekday: "short" });
+        const index = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(
+          dayName
+        );
+        if (index !== -1) {
+          revenueData[index].revenue += totalRevenue;
+        }
+      } else if (timeframe === "month") {
+        const weekNumber = Math.ceil(date.getDate() / 7) - 1; // Subtract 1 for zero-based index
+        if (weekNumber < revenueData.length) {
+          revenueData[weekNumber].revenue += totalRevenue;
+        }
+      }
+    });
+
+    return revenueData;
+  };
 
   const revenueData = {
-    week: [
-      { name: "Mon", revenue: 500 },
-      { name: "Tue", revenue: 700 },
-      { name: "Wed", revenue: 600 },
-      { name: "Thu", revenue: 800 },
-      { name: "Fri", revenue: 900 },
-      { name: "Sat", revenue: 1200 },
-      { name: "Sun", revenue: 1000 },
-    ],
-    month: [
-      { name: "Week 1", revenue: 5000 },
-      { name: "Week 2", revenue: 6000 },
-      { name: "Week 3", revenue: 7000 },
-      { name: "Week 4", revenue: 8000 },
-    ],
+    week: calculateRevenue("week"),
+    month: calculateRevenue("month"),
   };
+
+  useEffect(() => {
+    const fetchSalesFunc = async () => {
+      try {
+        await fetchLatestSales();
+      } catch (error) {
+        console.error("Error fetching sales", error);
+      }
+    };
+
+    fetchSalesFunc();
+  }, [fetchLatestSales]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -136,14 +189,14 @@ const AnalyticsContent = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {salesData.map((sale, index) => (
-                <TableRow key={index}>
-                  <TableCell>{sale.customer}</TableCell>
-                  <TableCell>{sale.item}</TableCell>
-                  <TableCell>${sale.price.toFixed(2)}</TableCell>
-                  <TableCell>{sale.quantity}</TableCell>
+              {sales.map((sale) => (
+                <TableRow key={sale.id}>
+                  <TableCell>{sale.user.name}</TableCell>
+                  <TableCell>{sale.items[0].product.name}</TableCell>
+                  <TableCell>${sale.items[0].price.toFixed(2)}</TableCell>
+                  <TableCell>{sale.items[0].quantity}</TableCell>
                   <TableCell>
-                    ${(sale.price * sale.quantity).toFixed(2)}
+                    ${(sale.items[0].price * sale.items[0].quantity).toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -173,13 +226,13 @@ const AnalyticsContent = ({
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueData[revenueTimeframe]}>
+              <BarChart data={revenueData[revenueTimeframe]}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#8884d8" />
-              </LineChart>
+                <Bar dataKey="revenue" fill="#8884d8" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
@@ -187,5 +240,6 @@ const AnalyticsContent = ({
     </div>
   );
 };
+
 
 export default DashboardPage;

@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect } from "react";
 import {
   Sheet,
@@ -27,8 +29,6 @@ const Cart = () => {
     isLoading,
     error,
   } = useProductStore();
-
-  
 
   const { user, isLoaded } = useUser();
 

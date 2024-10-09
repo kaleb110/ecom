@@ -16,6 +16,7 @@ import {
 import {
   createOrderController,
   getOrdersByUserController,
+  getLatestOrdersController
 } from "../controllers/order";
 import { validate } from "../middlewares/validate";
 import { addProductValidator } from "../validator/validator";
@@ -50,6 +51,7 @@ router.post("/cart/reset", resetCartController)
 // Order routes
 router.post("/orders", createOrderController);
 router.get("/orders/:clerkUserId", getOrdersByUserController);
+router.get("/sales", getLatestOrdersController);
 
 // user signup route
 router.post("/signin", addUserController);

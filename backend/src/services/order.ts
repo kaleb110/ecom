@@ -66,3 +66,16 @@ export const getOrders = async (clerkUserId: string) => {
   console.log("Orders from database:", orders);
   return orders;
 };
+
+export const getLatestOrders = async () => {
+  const orders = await prisma.order.findMany({
+    where: { status: "success" }, 
+    orderBy: { createdAt: "desc" }, 
+    take: 5, 
+    include: { user: true, items: { include: { product: true } } },
+  });
+
+  console.log("Latest orders from database:", orders);
+  return orders;
+};
+

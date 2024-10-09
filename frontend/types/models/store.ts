@@ -9,6 +9,7 @@ export interface Store {
   error: string | null;
   totalAmount: number;
   orders: any;
+  sales: any;
   category: string;
   chooseCategory: (category: string) => void;
   addProduct: (product: Product) => void;
@@ -39,5 +40,6 @@ export interface Store {
     address: string
   ) => void;
   fetchOrders: (clerkUserId: string) => void;
+  fetchLatestOrders: () => void;
   calculateTotalPrice: () => void;
 }
