@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { motion } from "framer-motion";
 import { CheckCircle, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,7 +34,8 @@ const SuccessPageComponent = () => {
         if (updatedCartItems.length > 0) {
           const total = calculateTotalPrice();
 
-          if (total > 0) {
+          // Fix: Ensure total is a number before comparison
+          if (typeof total === "number" && total > 0) {
             const status = "success";
             try {
               // Directly call addOrder with sessionId and cartItems
@@ -52,7 +52,7 @@ const SuccessPageComponent = () => {
               console.error("Error creating order:", error);
             }
           } else {
-            console.error("Total amount is zero, cannot create order.");
+            console.error("Total amount is invalid, cannot create order.");
           }
         } else {
           console.error("Cart items are empty, cannot proceed.");

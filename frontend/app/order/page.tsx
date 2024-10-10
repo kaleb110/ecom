@@ -114,6 +114,7 @@ export default function Component() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
+                              // TODO: add reciept
                               console.log("View receipt", order.id)
                             }
                           >

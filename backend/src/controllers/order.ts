@@ -59,15 +59,11 @@ export const getOrdersByUserController = async (
   try {
     const { clerkUserId } = req.params;
 
-    console.log("Fetching orders for clerkUserId:", clerkUserId);
-
     if (!clerkUserId) {
       return res.status(400).json({ error: "Missing userId" });
     }
 
     const orders = await getOrders(clerkUserId);
-
-    console.log("Orders fetched:", orders);
     res.status(200).json(orders);
   } catch (error: any) {
     console.error("Error fetching orders:", error);
@@ -80,11 +76,8 @@ export const getLatestOrdersController = async (
   res: Response
 ) => {
   try {
-    console.log("Fetching Latest orders");
 
     const orders = await getLatestOrders();
-
-    console.log("Orders fetched:", orders);
     res.status(200).json(orders);
   } catch (error: any) {
     console.error("Error fetching orders:", error);

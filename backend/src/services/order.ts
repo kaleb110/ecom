@@ -63,7 +63,6 @@ export const getOrders = async (clerkUserId: string) => {
     include: { items: { include: { product: true } } },
   });
 
-  console.log("Orders from database:", orders);
   return orders;
 };
 
@@ -74,7 +73,6 @@ export const getLatestOrders = async () => {
     include: { user: true, items: { include: { product: true } } },
   });
 
-  console.log("Latest orders from database:", orders);
   return orders;
 };
 

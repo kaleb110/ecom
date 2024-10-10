@@ -20,8 +20,6 @@ export const addUserController = async (req: Request, res: Response) => {
         email,
         name: name || "John Doe",
       });
-
-      console.log("New user created:", newUser);
       return res.status(201).json(newUser);
     }
 

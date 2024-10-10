@@ -21,7 +21,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import useProductStore from "@/utils/zustand";
 import { UploadButton } from "@/utils/uploadthing";
 import Image from "next/image";
-import { Product } from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
@@ -57,7 +56,7 @@ const NewProductForm = () => {
     },
   });
 
-  const onSubmit = async (data: Product) => {
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
       await addProduct(data);
@@ -258,12 +257,9 @@ const NewProductForm = () => {
                             endpoint="imageUploader"
                             onClientUploadComplete={(res) => {
                               // Log the response to see the URL
-                              console.log("Upload response:", res);
 
                               // Access the URL directly from serverData
                               const imageUrl = res?.[0]?.serverData.url || "";
-                              console.log("Image URL:", imageUrl); // Log the raw URL
-
                               // Set the raw URL (without decoding) to the form field
                               field.onChange(imageUrl);
                             }}
@@ -286,7 +282,6 @@ const NewProductForm = () => {
                               size="icon"
                               className="absolute -top-2 -right-2"
                               onClick={() => {
-                                console.log("Removing image"); // Debugging removal
                                 field.onChange(""); // Clear the image
                               }}
                             >

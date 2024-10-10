@@ -1,4 +1,4 @@
-import { CartItem, Product, User } from "@/types";
+import { CartItem, Product, User, Order } from "@/types";
 
 export interface Store {
   user: User | null;
@@ -8,8 +8,8 @@ export interface Store {
   isLoading: boolean;
   error: string | null;
   totalAmount: number;
-  orders: any;
-  sales: any;
+  orders: Array<Order>;
+  sales: Array<Order>;
   category: string;
   chooseCategory: (category: string) => void;
   addProduct: (product: Product) => void;
@@ -19,7 +19,7 @@ export interface Store {
     productId: number,
     quantity: number
   ) => void;
-  fetchProducts: () => Promise<Product[]>;
+  fetchProducts: () => void;
   deleteProduct: (productid: number) => void;
   fetchCartItems: (clerkUserId: string) => void;
   removeFromCartOptimistic: (cartId: number, productId: number) => void;
@@ -40,6 +40,6 @@ export interface Store {
     address: string
   ) => void;
   fetchOrders: (clerkUserId: string) => void;
-  fetchLatestOrders: () => void;
+  fetchLatestSales: () => void;
   calculateTotalPrice: () => void;
 }

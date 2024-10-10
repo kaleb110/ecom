@@ -34,27 +34,12 @@ export const getProductsController = async (req: Request, res: Response) => {
   }
 };
 
-// export const searchProductsController = async (req: Request, res: Response) => {
-//   const { search, category }: Search = req.query;
-
-//   try {
-//     const products = await searchProducts(search, category);
-//     if (!products) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-//     res.json(products);
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to search products" });
-//   }
-// };
-
 export const addProductController = async (req: Request, res: Response) => {
   try {
     const product: Product = { ...req.body };
 
     // Decode the image URL if necessary
     const decodedImageUrl = product.imageUrl.replace(/&#x2F;/g, "/");
-    console.log("Image URL:", decodedImageUrl);
 
     // Continue with the rest of your logic
     await addProduct({ ...product, imageUrl: decodedImageUrl });

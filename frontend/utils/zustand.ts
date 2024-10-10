@@ -22,11 +22,10 @@ const useProductStore = create<Store>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // Sending the product with the uploaded image URL to the backend
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:5000/products/add",
         product
       );
-      console.log("Product added successfully!", response.data);
     } catch (error) {
       console.error("Failed to add product!", error);
       set({ isLoading: false, error: error.message });
@@ -78,12 +77,12 @@ const useProductStore = create<Store>((set, get) => ({
   // Calculate the total price of the cart items
   calculateTotalPrice: () => {
     const { cartItems } = get();
-    const total = cartItems.reduce(
+    const total: number = cartItems.reduce(
       (total, item) => total + item.product.price * item.quantity,
       0
     );
     set({ totalAmount: total });
-    return total; // Ensure it returns the total amount
+    return total;
   },
 
   // Go to Stripe payment page
@@ -157,7 +156,7 @@ const useProductStore = create<Store>((set, get) => ({
 
   // Add a product to the cart
   addToCartOptimistic: (clerkUserId, productId, quantity) => {
-    set((state) => ({
+    set((state: Store) => ({
       cartItems: [
         ...(Array.isArray(state.cartItems) ? state.cartItems : []),
         {
@@ -166,7 +165,7 @@ const useProductStore = create<Store>((set, get) => ({
           product: { id: productId }, // Simplified product structure
         },
       ],
-    }));
+    } as Store));
 
     // Send the API request to persist the cart addition
     axios
@@ -305,6 +304,7 @@ const useProductStore = create<Store>((set, get) => ({
       set({ error: "Failed to fetch orders", isLoading: false });
     }
   },
+  
   fetchLatestSales: async () => {
     set({ isLoading: true, error: null });
     try {

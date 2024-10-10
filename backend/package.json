@@ -6,11 +6,11 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node-dev --respawn src/main.ts",
-    "start": "node src/main.ts",
+    "start": "node dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["ecommerce", "sales", "product"],
+  "author": "kaleb",
   "license": "ISC",
   "description": "",
   "dependencies": {

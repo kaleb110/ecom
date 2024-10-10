@@ -40,8 +40,6 @@ export const updateCartItemController = async (req: Request, res: Response) => {
 export const getCartItemsController = async (req: Request, res: Response) => {
   const { clerkUserId } = req.params;
 
-  console.log("Entering getCartItemsController with clerkUserId:", clerkUserId);
-
   try {
     if (!clerkUserId) {
       return res.status(400).json({ error: "Missing clerkUserId" });

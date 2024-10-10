@@ -38,6 +38,7 @@ export default function ProductsPage() {
   }, [fetchProducts]);
 
   const handleEdit = (productId: number) => {
+    // TODO: add edit functionality
     console.log(`Edit product with id: ${productId}`);
     // Implement edit functionality
   };
