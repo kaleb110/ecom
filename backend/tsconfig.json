@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
+    "target": "es2016",
     "module": "commonjs",
-    "target": "es6",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "types": ["node"], // Ensure this line is included
-    "typeRoots": ["./node_modules/@types"] // Optional: explicitly point to type definitions
+    "outDir": "./dist", // Add this to specify the output directory for compiled files
+    "rootDir": "./src", // Add this to specify the root directory of your source files
+    "esModuleInterop": true, // Enable interoperability between CommonJS and ES modules
+    "types": ["node"], // Include Node.js types
+    "resolveJsonModule": true // Add this if you're importing JSON files
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"] // Exclude node_modules to avoid type conflicts
 }
