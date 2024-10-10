@@ -7,7 +7,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node"], // Ensure this line is included
+    "typeRoots": ["./node_modules/@types"] // Optional: explicitly point to type definitions
   },
   "exclude": ["node_modules"]
 }
