@@ -30,7 +30,7 @@ const PaymentFailurePageComponent = () => {
               {errorMessage} {/* Display the dynamic error message */}
             </p>
             <div className="space-y-4">
-              <Button className="w-full" onClick={() => router.push("/")}>
+              <Button className="w-full" onClick={() => router.push("/cart")}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Retry Payment
               </Button>

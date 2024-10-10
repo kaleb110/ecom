@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusCircle, Package, ShoppingCart } from "lucide-react";
+import { PlusCircle, Package, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import NewProductForm from "@/app/addproduct/page";
-import Orders from "@/app/order/page";
 import {
   Table,
   TableBody,
@@ -27,12 +26,14 @@ import {
 } from "recharts";
 import ProductsPage from "../productlist/page";
 import useProductStore from "@/utils/zustand";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const navItems = [
   { id: "create", label: "Create", icon: PlusCircle },
   { id: "products", label: "Products", icon: Package },
-  { id: "orders", label: "Orders", icon: ShoppingCart },
-  { id: "analytics", label: "Analytics", icon: BarChart },
+  { id: "analytics", label: "Analytics", icon: BarChart2 },
 ];
 
 const DashboardPage = () => {
@@ -75,7 +76,6 @@ const DashboardPage = () => {
             >
               {activeTab === "create" && <NewProductForm />}
               {activeTab === "products" && <ProductsPage />}
-              {activeTab === "orders" && <Orders />}
               {activeTab === "analytics" && (
                 <AnalyticsContent
                   revenueTimeframe={revenueTimeframe}
@@ -91,10 +91,9 @@ const DashboardPage = () => {
 };
 
 const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
-  const { fetchLatestSales, sales, isLoading, error } = useProductStore();
+  const { fetchLatestSales, sales, error } = useProductStore();
 
-  // Function to initialize revenue data for the week and month
-  const initializeRevenueData = (timeframe) => {
+  const initializeRevenueData = (timeframe: string) => {
     if (timeframe === "week") {
       return [
         { name: "Mon", revenue: 0 },
@@ -111,14 +110,13 @@ const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
         { name: "Week 2", revenue: 0 },
         { name: "Week 3", revenue: 0 },
         { name: "Week 4", revenue: 0 },
-        { name: "Week 5", revenue: 0 }, // Handle cases for months with more than 4 weeks
+        { name: "Week 5", revenue: 0 },
       ];
     }
     return [];
   };
 
-  // Function to calculate revenue based on sales data
-  const calculateRevenue = (timeframe) => {
+  const calculateRevenue = (timeframe: string) => {
     const revenueData = initializeRevenueData(timeframe);
 
     sales.forEach((sale) => {
@@ -136,7 +134,7 @@ const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
           revenueData[index].revenue += totalRevenue;
         }
       } else if (timeframe === "month") {
-        const weekNumber = Math.ceil(date.getDate() / 7) - 1; // Subtract 1 for zero-based index
+        const weekNumber = Math.ceil(date.getDate() / 7) - 1;
         if (weekNumber < revenueData.length) {
           revenueData[weekNumber].revenue += totalRevenue;
         }
@@ -163,10 +161,6 @@ const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
     fetchSalesFunc();
   }, [fetchLatestSales]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -178,30 +172,47 @@ const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
           <CardTitle>Sales</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Item</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sales.map((sale) => (
-                <TableRow key={sale.id}>
-                  <TableCell>{sale.user.name}</TableCell>
-                  <TableCell>{sale.items[0].product.name}</TableCell>
-                  <TableCell>${sale.items[0].price.toFixed(2)}</TableCell>
-                  <TableCell>{sale.items[0].quantity}</TableCell>
-                  <TableCell>
-                    ${(sale.items[0].price * sale.items[0].quantity).toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ScrollArea className="h-[300px] w-full">
+            <div className="min-w-[800px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Item</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sales.map((sale) => (
+                    <TableRow key={sale.id}>
+                      <TableCell>{sale.user.name}</TableCell>
+                      <TableCell>{sale.items[0].product.name}</TableCell>
+                      <TableCell>{sale.address}</TableCell>
+                      <TableCell>
+                        <Badge>
+                          {sale.status.charAt(0).toUpperCase() +
+                            sale.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(sale.createdAt), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        $
+                        {(sale.items[0].price * sale.items[0].quantity).toFixed(
+                          2
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </CardContent>
       </Card>
 
@@ -224,7 +235,7 @@ const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
               This Month
             </Button>
           </div>
-          <div className="h-[300px]">
+          <div className="h-[300px] w-full md:w-3/4 lg:w-2/3 mx-auto">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueData[revenueTimeframe]}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -240,6 +251,5 @@ const AnalyticsContent = ({ revenueTimeframe, setRevenueTimeframe }) => {
     </div>
   );
 };
-
 
 export default DashboardPage;

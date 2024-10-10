@@ -3,17 +3,21 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard } from "lucide-react";
-import Cart from "@/app/cart/page";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
 import { User } from "@/types";
 import Link from "next/link";
+import { ShoppingCart, Package } from "lucide-react";
 
 export function EcomNavbarComponent() {
-  const { signInUser } = useProductStore();
+  const { signInUser, cartItems } = useProductStore();
   const { user, isLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const cartArray = Array.isArray(cartItems) ? cartItems : [];
+
+  const totalItems = cartArray.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -50,21 +54,11 @@ export function EcomNavbarComponent() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex-shrink-0 flex items-center">
-            <span className="text-2xl font-bold text-primary">ecom</span>
+            <span className="text-xl font-bold text-primary">ShopCom</span>
           </Link>
 
           <div className="flex items-center justify-center gap-4">
-            <div>
-              <SignedOut>
-                <SignInButton>
-                  <Button variant="outline">Sign In</Button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-
+            {/* admin dashboard button */}
             {isAdmin && (
               <Link href="/dashboard" passHref>
                 <Button variant="ghost" size="icon" className="relative">
@@ -74,7 +68,33 @@ export function EcomNavbarComponent() {
               </Link>
             )}
 
-            <Cart />
+            {/* order button */}
+            <Link href="/order">
+              <Button
+                variant="outline"
+                size="icon"
+                className={`relative`}
+                aria-label="View Orders"
+              >
+                <Package className="h-5 w-5 text-primary" />
+              </Button>
+            </Link>
+
+            {/* cart button */}
+            <Link href="/cart">
+              <Button variant="outline" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                <span className="sr-only">Cart</span>
+                <span className="absolute -top-2 -right-2 h-5 w-5 text-[10px] font-bold rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                  {totalItems}
+                </span>
+              </Button>
+            </Link>
+
+            {/* user button */}
+            <div>
+              <UserButton />
+            </div>
           </div>
         </div>
       </div>

@@ -6,12 +6,10 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Star } from "lucide-react";
 import useProductStore from "@/utils/zustand";
 
 export function ProductCardComponent() {
-  const { products, error, isLoading, fetchProducts, category } =
+  const { products, error, fetchProducts, category } =
     useProductStore();
 
   useEffect(() => {
@@ -26,26 +24,6 @@ export function ProductCardComponent() {
           (product) => product.categories.some((cat) => cat.name === category) // Adjusted to check if any category matches
         );
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-        {[...Array(8)].map((_, index) => (
-          <Card key={index} className="w-full overflow-hidden">
-            <Skeleton className="h-48 w-full" />
-            <CardHeader className="p-4">
-              <Skeleton className="h-4 w-2/3" />
-            </CardHeader>
-            <CardContent className="p-4">
-              <Skeleton className="h-4 w-1/2 mb-2" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full mt-2" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex justify-center items-center h-[50vh]">
@@ -58,7 +36,6 @@ export function ProductCardComponent() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
       {filteredProducts.map((product) => {
         const { id, name, price, description, imageUrl, categories } = product;
-        const rating = 4; // Default rating if not provided
 
         return (
           <motion.div
@@ -105,21 +82,6 @@ export function ProductCardComponent() {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {description}
                     </p>
-                    <div className="flex items-center space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.round(rating)
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                      <span className="text-sm text-muted-foreground ml-1">
-                        ({rating.toFixed(1)})
-                      </span>
-                    </div>
                   </CardContent>
                 </div>
               </Card>

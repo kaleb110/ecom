@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useUser } from "@clerk/nextjs";
-// import { EcomNavbarComponent } from "@/components/ecom-navbar";
 
 const ProductDetailsComponent = () => {
   const { user } = useUser();
@@ -25,15 +24,13 @@ const ProductDetailsComponent = () => {
   const { id } = useParams();
   const { toast } = useToast();
 
-  // State for quantity
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetchProductDetail(id);
   }, [fetchProductDetail, id]);
 
-  // Use Clerk's user ID
-  const clerkUserId = user?.id; // Get user ID from Clerk
+  const clerkUserId = user?.id;
 
   const handleAddCartButton = () => {
     if (!clerkUserId) {
@@ -45,10 +42,8 @@ const ProductDetailsComponent = () => {
       return;
     }
 
-    // Optimistically add to cart
     addToCartOptimistic(clerkUserId, productDetail?.id, quantity);
 
-    // Display the toast notification
     toast({
       title: "Added to Cart",
       description: `${quantity} ${
@@ -63,7 +58,7 @@ const ProductDetailsComponent = () => {
   const LoadingSkeleton = () => (
     <div className="container mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-8">
-        <Skeleton className="aspect-square w-full h-full" />
+        <Skeleton className="aspect-square w-full h-[70vh]" />
         <div className="space-y-6">
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-6 w-1/4" />
@@ -86,12 +81,10 @@ const ProductDetailsComponent = () => {
   const { name, description, price, stock, imageUrl, categories } =
     productDetail;
 
-  // Function to increase quantity
   const increaseQuantity = () => {
     setQuantity((prev) => prev + 1);
   };
 
-  // Function to decrease quantity
   const decreaseQuantity = () => {
     if (quantity > 1) {
       setQuantity((prev) => prev - 1);
@@ -100,24 +93,23 @@ const ProductDetailsComponent = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* <EcomNavbarComponent /> */}
       <div className="container mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-8 items-start">
           <div className="space-y-4">
-            <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative overflow-hidden rounded-lg bg-gray-100 h-[70vh]">
               <Image
-                src={imageUrl || ""}
+                src={imageUrl || "/placeholder.svg"}
                 alt={name}
-                className="object-cover w-full h-full"
-                width={1200}
-                height={400}
+                className="object-cover"
+                layout="fill"
+                priority
               />
             </div>
           </div>
           <div className="space-y-6">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold">{name}</h1>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {categories.length > 0
                   ? categories.map((category) => (
                       <Badge
@@ -145,7 +137,6 @@ const ProductDetailsComponent = () => {
               )}
             </div>
 
-            {/* Quantity Selector */}
             <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
@@ -160,7 +151,6 @@ const ProductDetailsComponent = () => {
               </Button>
             </div>
 
-            {/* Add to Cart Button */}
             <Button
               size="lg"
               className="w-full md:w-auto"

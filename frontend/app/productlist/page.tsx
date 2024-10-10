@@ -17,13 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import useProductStore from "@/utils/zustand";
 import { Product } from "@/types";
 
 export default function ProductsPage() {
-  const { products, fetchProducts, deleteProduct, isLoading } =
+  const { products, fetchProducts, deleteProduct } =
     useProductStore();
 
   useEffect(() => {
@@ -46,10 +45,6 @@ export default function ProductsPage() {
   const handleDelete = async (productId: number) => {
     await deleteProduct(productId);
   };
-
-  if (isLoading) {
-    return <ProductTableSkeleton />;
-  }
 
   return (
     <div className="container mx-auto pb-10">
@@ -101,58 +96,6 @@ export default function ProductsPage() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-}
-
-function ProductTableSkeleton() {
-  return (
-    <div className="container mx-auto py-10">
-      <Skeleton className="w-[200px] h-[36px] mb-4" />
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <Skeleton className="h-4 w-[40px]" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-[50px]" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-[100px]" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-[60px]" />
-              </TableHead>
-              <TableHead className="text-right">
-                <Skeleton className="h-4 w-[60px] ml-auto" />
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...Array(5)].map((_, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <Skeleton className="h-4 w-[40px]" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-[50px] w-[50px] rounded-md" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-[150px]" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-[60px]" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <Skeleton className="h-8 w-8 rounded-full ml-auto" />
                 </TableCell>
               </TableRow>
             ))}
