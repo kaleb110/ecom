@@ -48,7 +48,6 @@ export const getCartItemsController = async (req: Request, res: Response) => {
     }
 
     const cartItems = await getCartItems(clerkUserId);
-    console.log("Fetched cart items:", cartItems);
     res.status(200).json(cartItems);
   } catch (error: any) {
     console.error("Error fetching cart items:", error.message);

@@ -100,7 +100,7 @@ export const removeProductFromCart = async (cartData: CartItem) => {
   const { cartId, productId } = cartData;
 
   const cart = await prisma.cart.findUnique({
-    where: { id: cartId }, // Make sure the `id` is the correct primary key of the cart
+    where: { id: Number(cartId) }, // Make sure the `id` is the correct primary key of the cart
   });
 
   if (!cart) {
@@ -111,7 +111,7 @@ export const removeProductFromCart = async (cartData: CartItem) => {
   await prisma.cartItem.deleteMany({
     where: {
       cartId: cart.id,
-      productId: productId,
+      productId: Number(productId),
     },
   });
 };
