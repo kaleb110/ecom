@@ -9,13 +9,17 @@
     "start": "node dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["ecommerce", "sales", "product"],
+  "keywords": [
+    "ecommerce",
+    "sales",
+    "product"
+  ],
   "author": "kaleb",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "@clerk/clerk-sdk-node": "^5.0.42",
-    "@prisma/client": "^5.19.1",
+    "@prisma/client": "^5.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
@@ -25,8 +29,11 @@
   "devDependencies": {
     "@clerk/types": "^4.21.0",
     "@types/cors": "^2.8.17",
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^4.17.21",
+    "@types/express-validator": "^2.20.33",
     "@types/node": "^22.5.5",
+    "@types/stripe": "^8.0.416",
     "prisma": "^5.19.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
