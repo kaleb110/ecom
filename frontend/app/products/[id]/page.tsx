@@ -20,7 +20,6 @@ const ProductDetailsComponent = () => {
     error,
     productDetail,
     addToCartOptimistic,
-    fetchCartItems,
   } = useProductStore();
   const { id } = useParams();
   const { toast } = useToast();
@@ -44,8 +43,6 @@ const ProductDetailsComponent = () => {
     }
 
     addToCartOptimistic(clerkUserId, productDetail?.id, quantity);
-   
-    await fetchCartItems(user.id);
 
     toast({
       title: "Added to Cart",

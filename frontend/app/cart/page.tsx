@@ -9,6 +9,7 @@ import useProductStore from "@/utils/zustand";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { CartItem } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CartPage() {
   const {
@@ -58,12 +59,38 @@ export default function CartPage() {
     setProcessing(false);
   };
 
+  const CartItemSkeleton = () => (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 border-b">
+      <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+        <Skeleton className="w-24 h-24 rounded-md" />
+        <div>
+          <Skeleton className="h-4 w-[150px] mb-2" />
+          <Skeleton className="h-4 w-[100px]" />
+        </div>
+      </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+        <Skeleton className="h-8 w-20 rounded-md" />
+      </div>
+    </div>
+  );
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          {cartArray.length === 0 ? (
+          {isLoading && !processing ? (
+            <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+              {[...Array(3)].map((_, index) => (
+                <CartItemSkeleton key={index} />
+              ))}
+            </ScrollArea>
+          ) : cartArray.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
               <ShoppingCart className="w-16 h-16 text-gray-400 mb-4" />
               <p className="text-xl font-semibold text-gray-600">
