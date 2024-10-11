@@ -1,15 +1,14 @@
-"use client";
+"use client"
+
 import { motion } from "framer-motion";
-import { CheckCircle, FileText, ArrowRight } from "lucide-react";
+import { CheckCircle, FileText, ArrowRight, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import dynamic from "next/dynamic";
-
-const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
 
 const SuccessPageComponent = () => {
   const {
@@ -23,34 +22,43 @@ const SuccessPageComponent = () => {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
 
-  const sessionId = searchParams.get("session_id"); // Extract session ID from the URL
-
+  const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     const fetchCartAndCreateOrder = async () => {
       if (isLoaded && user && sessionId) {
-        await fetchCartItems(user.id); // Fetch user's cart items
+        await fetchCartItems(user.id);
         const { cartItems: updatedCartItems } = useProductStore.getState();
 
         if (updatedCartItems.length > 0) {
           const total = calculateTotalPrice();
 
-          // Fix: Ensure total is a number before comparison
           if (typeof total === "number" && total > 0) {
             const status = "success";
             try {
-              // Directly call addOrder with sessionId and cartItems
-              await addOrder(
-                user.id,
-                status,
-                total,
-                updatedCartItems,
-                sessionId
-              );
+              await addOrder(user.id, status, total, updatedCartItems, sessionId);
               await resetCart(user.id);
+              
+              // Show celebration toast
+              toast({
+                title: (
+                  <div className="flex items-center">
+                    <PartyPopper className="w-5 h-5 mr-2 text-yellow-400" />
+                    Order Placed Successfully!
+                  </div>
+                ),
+                description: "Thank you for your purchase!",
+                duration: 5000,
+              });
             } catch (error) {
               console.error("Error creating order:", error);
+              toast({
+                title: "Oops! Something went wrong.",
+                description: "We couldn't process your order. Please try again.",
+                variant: "destructive",
+              });
             }
           } else {
             console.error("Total amount is invalid, cannot create order.");
@@ -62,15 +70,7 @@ const SuccessPageComponent = () => {
     };
 
     fetchCartAndCreateOrder();
-  }, [
-    user,
-    isLoaded,
-    sessionId,
-    addOrder,
-    resetCart,
-    calculateTotalPrice,
-    fetchCartItems,
-  ]);
+  }, [user, isLoaded, sessionId, addOrder, resetCart, calculateTotalPrice, fetchCartItems, toast]);
 
   const handleContinueShopping = () => {
     router.push("/");
@@ -78,43 +78,44 @@ const SuccessPageComponent = () => {
 
   return (
     <div className="container max-w-md mx-auto px-4 py-16">
-      <Confetti
-        width={1200}
-        height={400}
-        recycle={false}
-        numberOfPieces={200}
-      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
       >
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Thank You!</h1>
-            <p className="text-muted-foreground mb-6">
+        <Card className="text-center shadow-lg">
+          <CardContent className="pt-10 pb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <CheckCircle className="w-24 h-24 text-green-500 mx-auto mb-6" />
+            </motion.div>
+            <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
+            <p className="text-lg text-muted-foreground mb-8">
               Your payment was successful and your order has been placed.
             </p>
-            {error && <p className="text-red-500">{error}</p>}
+            {error && <p className="text-red-500 mb-4">{error}</p>}
             <Button
-              className="w-full"
+              className="w-full text-lg py-6"
               onClick={() => router.push("/order")}
               disabled={isLoading}
             >
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className="mr-2 h-5 w-5" />
               View Order Details
             </Button>
           </CardContent>
-          <CardFooter className="justify-center">
+          <CardFooter className="justify-center pb-8">
             <Button
-              variant="link"
-              className="text-sm"
+              variant="outline"
+              size="lg"
+              className="text-base"
               onClick={handleContinueShopping}
+              disabled={isLoading}
             >
               Continue Shopping
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </CardFooter>
         </Card>

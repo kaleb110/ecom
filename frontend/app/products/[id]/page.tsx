@@ -20,6 +20,7 @@ const ProductDetailsComponent = () => {
     error,
     productDetail,
     addToCartOptimistic,
+    fetchCartItems,
   } = useProductStore();
   const { id } = useParams();
   const { toast } = useToast();
@@ -32,7 +33,7 @@ const ProductDetailsComponent = () => {
 
   const clerkUserId = user?.id;
 
-  const handleAddCartButton = () => {
+  const handleAddCartButton = async () => {
     if (!clerkUserId) {
       toast({
         title: "Error",
@@ -43,6 +44,8 @@ const ProductDetailsComponent = () => {
     }
 
     addToCartOptimistic(clerkUserId, productDetail?.id, quantity);
+   
+    await fetchCartItems(user.id);
 
     toast({
       title: "Added to Cart",

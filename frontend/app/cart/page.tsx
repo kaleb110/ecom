@@ -173,7 +173,7 @@ export default function CartPage() {
             <Button
               className="w-full"
               onClick={handleCheckout}
-              disabled={cartArray.length === 0 && processing}
+              disabled={cartArray.length === 0 || processing}
             >
               {isLoading && processing
                 ? "Processing..."
