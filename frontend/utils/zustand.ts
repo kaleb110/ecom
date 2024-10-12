@@ -22,7 +22,7 @@ const useProductStore = create<Store>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // Sending the product with the uploaded image URL to the backend
-      await axios.post("http://localhost:5000/products/add", product);
+      await axios.post("https://ecom-tnii.onrender.com/products/add", product);
     } catch (error) {
       console.error("Failed to add product!", error);
       set({ isLoading: false, error: error.message });
@@ -33,11 +33,14 @@ const useProductStore = create<Store>((set, get) => ({
     set({ isLoading: true });
     const { clerkUserId, email, name } = userData;
     try {
-      const response = await axios.post("http://localhost:5000/signin", {
-        clerkUserId,
-        email,
-        name,
-      });
+      const response = await axios.post(
+        "https://ecom-tnii.onrender.com/signin",
+        {
+          clerkUserId,
+          email,
+          name,
+        }
+      );
       set({ user: response.data, isLoading: false });
     } catch (error) {
       console.error(
@@ -52,7 +55,9 @@ const useProductStore = create<Store>((set, get) => ({
   fetchProducts: async () => {
     set({ isLoading: true });
     try {
-      const response = await axios.get("http://localhost:5000/products");
+      const response = await axios.get(
+        "https://ecom-tnii.onrender.com/products"
+      );
       set({ products: response.data, isLoading: false });
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -63,7 +68,7 @@ const useProductStore = create<Store>((set, get) => ({
   deleteProduct: async (productid: number) => {
     set({ isLoading: true, error: null });
     try {
-      await axios.delete(`http://localhost:5000/products/${productid}`);
+      await axios.delete(`https://ecom-tnii.onrender.com/${productid}`);
       set({ isLoading: false });
     } catch (error) {
       console.error("Error deleting product !", error);
@@ -96,9 +101,12 @@ const useProductStore = create<Store>((set, get) => ({
       calculateTotalPrice();
 
       // Proceed to payment
-      const response = await axios.post("http://localhost:5000/payment", {
-        cartItems,
-      });
+      const response = await axios.post(
+        "https://ecom-tnii.onrender.com/payment",
+        {
+          cartItems,
+        }
+      );
 
       const { url } = response.data;
       if (url) {
@@ -120,7 +128,9 @@ const useProductStore = create<Store>((set, get) => ({
   fetchProductDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`http://localhost:5000/products/${id}`);
+      const response = await axios.get(
+        `https://ecom-tnii.onrender.com/products/${id}`
+      );
       set({ productDetail: response.data, isLoading: false });
     } catch (error) {
       set({ error: "Failed to fetch product details", isLoading: false });
@@ -136,7 +146,7 @@ const useProductStore = create<Store>((set, get) => ({
     }
     try {
       const response = await axios.get(
-        `http://localhost:5000/cart/${clerkUserId}`
+        `https://ecom-tnii.onrender.com/cart/${clerkUserId}`
       );
       if (response.data && response.data.items) {
         set({ cartItems: response.data.items, isLoading: false });
@@ -153,23 +163,20 @@ const useProductStore = create<Store>((set, get) => ({
 
   // Add a product to the cart
   addToCartOptimistic: (clerkUserId, productId, quantity) => {
-    set(
-      (state: Store) =>
-        ({
-          cartItems: [
-            ...(Array.isArray(state.cartItems) ? state.cartItems : []),
-            {
-              id: `${clerkUserId}-${productId}`, // Unique ID for the cart item
-              quantity,
-              product: { id: productId }, // Simplified product structure
-            },
-          ],
-        } as Store)
-    );
+    set((state: Store) => ({
+      cartItems: [
+        ...(Array.isArray(state.cartItems) ? state.cartItems : []),
+        {
+          id: `${clerkUserId}-${productId}`, // Unique ID for the cart item
+          quantity,
+          product: { id: productId }, // Simplified product structure
+        },
+      ],
+    } as Store));
 
     // Send the API request to persist the cart addition
     axios
-      .post(`http://localhost:5000/cart/items`, {
+      .post(`https://ecom-tnii.onrender.com/cart/items`, {
         clerkUserId,
         productId,
         quantity,
@@ -201,7 +208,7 @@ const useProductStore = create<Store>((set, get) => ({
 
     // Make API call to persist the update
     axios
-      .put(`http://localhost:5000/cart/items`, {
+      .put(`https://ecom-tnii.onrender.com/cart/items`, {
         cartId,
         productId,
         quantity,
@@ -234,7 +241,9 @@ const useProductStore = create<Store>((set, get) => ({
 
     // Make the API call to remove the item from the server
     axios
-      .delete(`http://localhost:5000/cart/items/${cartId}/${productId}`)
+      .delete(
+        `https://ecom-tnii.onrender.com/cart/items/${cartId}/${productId}`
+      )
       .then(() => {
         get().calculateTotalPrice(); // Recalculate total amount after removing item
       })
@@ -253,17 +262,20 @@ const useProductStore = create<Store>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const response = await axios.post("http://localhost:5000/orders", {
-        clerkUserId,
-        totalAmount,
-        status,
-        sessionId,
-        items: cartItems.map((item) => ({
-          productId: item.product.id,
-          quantity: item.quantity,
-          price: item.product.price,
-        })),
-      });
+      const response = await axios.post(
+        "https://ecom-tnii.onrender.com/orders",
+        {
+          clerkUserId,
+          totalAmount,
+          status,
+          sessionId,
+          items: cartItems.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price,
+          })),
+        }
+      );
 
       if (response.data) {
         set((state) => ({
@@ -284,7 +296,9 @@ const useProductStore = create<Store>((set, get) => ({
   resetCart: async (clerkUserId) => {
     set({ isLoading: true, error: null });
     try {
-      await axios.post(`http://localhost:5000/cart/reset`, { clerkUserId });
+      await axios.post(`https://ecom-tnii.onrender.com/cart/reset`, {
+        clerkUserId,
+      });
       set({ cartItems: [], isLoading: false });
     } catch (error) {
       console.error("Failed to reset cart:", error);
@@ -296,7 +310,7 @@ const useProductStore = create<Store>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(
-        `http://localhost:5000/orders/${clerkUserId}`
+        `https://ecom-tnii.onrender.com/orders/${clerkUserId}`
       );
       set({ orders: response.data, isLoading: false });
     } catch (error) {
@@ -304,11 +318,11 @@ const useProductStore = create<Store>((set, get) => ({
       set({ error: "Failed to fetch orders", isLoading: false });
     }
   },
-
+  
   fetchLatestSales: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get("http://localhost:5000/sales");
+      const response = await axios.get("https://ecom-tnii.onrender.com/sales");
       set({ sales: response.data, isLoading: false });
     } catch (error) {
       console.error("Failed to fetch sales:", error);
