@@ -1,4 +1,0 @@
-
-Add real rating to the product
-Add navigation show for each product like product > name 
-add veiw reciept and edit order

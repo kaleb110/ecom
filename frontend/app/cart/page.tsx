@@ -85,11 +85,11 @@ export default function CartPage() {
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {isLoading && !processing ? (
-            <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+            <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-4">
               {[...Array(3)].map((_, index) => (
                 <CartItemSkeleton key={index} />
               ))}
-            </ScrollArea>
+            </div>
           ) : cartArray.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
               <ShoppingCart className="w-16 h-16 text-gray-400 mb-4" />
@@ -101,7 +101,7 @@ export default function CartPage() {
               </p>
             </div>
           ) : (
-            <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+            <ScrollArea className="h-auto max-h-[calc(100vh-200px)] pr-4">
               <AnimatePresence initial={false}>
                 {cartArray.map((item: CartItem) => (
                   <motion.div
@@ -185,7 +185,7 @@ export default function CartPage() {
           )}
         </div>
         <div className="lg:col-span-1">
-          <div className="bg-muted p-6 rounded-lg">
+          <div className="bg-muted p-6 rounded-lg sticky top-4">
             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between">

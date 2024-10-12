@@ -57,26 +57,33 @@ const ProductDetailsComponent = () => {
 
   const LoadingSkeleton = () => (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-2 gap-8">
-        <Skeleton className="aspect-square w-full h-[70vh]" />
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-3/4" />
-          <Skeleton className="h-6 w-1/4" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-10 w-1/3" />
-          <div className="flex space-x-4">
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-10 w-10" />
+      <div className="grid md:grid-cols-[35%_55%] gap-4 items-start w-full">
+        <div className="space-y-4 w-full pr-4">
+          <Skeleton className="w-full h-[70vh] rounded-lg" />
+        </div>
+        <div className="space-y-4 pl-4">
+          <Skeleton className="h-8 w-3/4" />
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-20" />
           </div>
-          <Skeleton className="h-12 w-full md:w-1/2" />
+          <Skeleton className="h-10 w-1/4" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-8 w-24" />
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+          </div>
+          <Skeleton className="h-12 w-40" />
         </div>
       </div>
     </div>
   );
 
-  if (isLoading) return <LoadingSkeleton />;
-  if (!productDetail) return <p>No Product</p>;
+
+  if (isLoading || !productDetail) return <LoadingSkeleton />;
 
   const { name, description, price, stock, imageUrl, categories } =
     productDetail;
@@ -94,9 +101,9 @@ const ProductDetailsComponent = () => {
   return (
     <div className="flex flex-col gap-5">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-2 gap-8 items-start">
-          <div className="space-y-4">
-            <div className="relative overflow-hidden rounded-lg bg-gray-100 h-[70vh]">
+        <div className="grid md:grid-cols-[35%_55%] gap-4 items-start w-full">
+          <div className="space-y-4 w-full pr-4">
+            <div className="relative overflow-hidden rounded-lg bg-gray-100  h-[70vh]">
               <Image
                 src={imageUrl || "/placeholder.svg"}
                 alt={name}
@@ -106,16 +113,16 @@ const ProductDetailsComponent = () => {
               />
             </div>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4 pl-4">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold">{name}</h1>
-              <div className="flex flex-wrap gap-3">
+              <h1 className="text-2xl md:text-3xl font-bold">{name}</h1>
+              <div className="flex flex-wrap gap-2">
                 {categories.length > 0
                   ? categories.map((category) => (
                       <Badge
                         key={category.name}
                         variant="secondary"
-                        className="text-sm"
+                        className="text-xs"
                       >
                         {category.name}
                       </Badge>
@@ -123,16 +130,18 @@ const ProductDetailsComponent = () => {
                   : "unknown"}
               </div>
             </div>
-            <div className="text-4xl font-bold">${price.toFixed(2)}</div>
-            <p className="text-gray-500">{description}</p>
+            <div className="text-2xl md:text-3xl font-bold">
+              ${price.toFixed(2)}
+            </div>
+            <p className="text-sm md:text-base text-gray-500">{description}</p>
             <div className="flex items-center space-x-2">
               {stock ? (
                 <Badge variant="default" className="bg-green-500">
-                  <Check className="mr-1 h-4 w-4" /> In Stock
+                  <Check className="mr-1 h-3 w-3" /> In Stock
                 </Badge>
               ) : (
                 <Badge variant="destructive">
-                  <X className="mr-1 h-4 w-4" /> Out of Stock
+                  <X className="mr-1 h-3 w-3" /> Out of Stock
                 </Badge>
               )}
             </div>
@@ -140,14 +149,15 @@ const ProductDetailsComponent = () => {
             <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={decreaseQuantity}
                 disabled={quantity === 1}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3 w-3" />
               </Button>
-              <span className="text-xl font-semibold">{quantity}</span>
-              <Button variant="outline" onClick={increaseQuantity}>
-                <Plus className="h-4 w-4" />
+              <span className="text-lg font-semibold">{quantity}</span>
+              <Button variant="outline" size="sm" onClick={increaseQuantity}>
+                <Plus className="h-3 w-3" />
               </Button>
             </div>
 
@@ -157,7 +167,7 @@ const ProductDetailsComponent = () => {
               disabled={!stock}
               onClick={handleAddCartButton}
             >
-              <ShoppingCart className="mr-2 h-5 w-5" />
+              <ShoppingCart className="mr-2 h-4 w-4" />
               Add {quantity} to Cart
             </Button>
           </div>

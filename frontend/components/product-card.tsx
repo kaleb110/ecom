@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import useProductStore from "@/utils/zustand";
 
 export function ProductCardComponent() {
-  const { products, error, fetchProducts, category } =
-    useProductStore();
+  const { products, error, fetchProducts, category } = useProductStore();
 
   useEffect(() => {
     fetchProducts();
@@ -20,8 +19,8 @@ export function ProductCardComponent() {
   const filteredProducts =
     category === "all"
       ? products
-      : products.filter(
-          (product) => product.categories.some((cat) => cat.name === category) // Adjusted to check if any category matches
+      : products.filter((product) =>
+          product.categories.some((cat) => cat.name === category)
         );
 
   if (error) {
@@ -35,7 +34,7 @@ export function ProductCardComponent() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
       {filteredProducts.map((product) => {
-        const { id, name, price, description, imageUrl, categories } = product;
+        const { id, name, price, imageUrl, categories } = product;
 
         return (
           <motion.div
@@ -45,7 +44,7 @@ export function ProductCardComponent() {
             transition={{ duration: 0.3 }}
           >
             <Link href={`/products/${id}`}>
-              <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105">
+              <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:scale-105">
                 <div className="relative h-48 overflow-hidden">
                   <Image
                     src={imageUrl || ""}
@@ -69,19 +68,16 @@ export function ProductCardComponent() {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col p-4 space-y-3">
+                <div className="flex flex-col pt-2 pb-6 pr-4 pl-2 mt-2">
                   <CardHeader className="p-0">
                     <CardTitle className="text-lg font-semibold line-clamp-1">
                       {name}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-0 flex flex-col space-y-2">
+                  <CardContent className="p-0 mt-2">
                     <div className="text-2xl font-bold text-primary">
                       ${price.toFixed(2)}
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {description}
-                    </p>
                   </CardContent>
                 </div>
               </Card>

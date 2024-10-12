@@ -57,6 +57,7 @@ const getOrders = (clerkUserId) => __awaiter(void 0, void 0, void 0, function* (
     }
     const orders = yield config_1.prisma.order.findMany({
         where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
         include: { items: { include: { product: true } } },
     });
     return orders;

@@ -34,10 +34,10 @@ const formSchema = z.object({
 });
 
 const categories = [
-  { id: 1, name: "Tech" },
-  { id: 2, name: "Car" },
-  { id: 3, name: "Health" },
-  { id: 4, name: "Sport" },
+  { id: 1, name: "Apparel" },
+  { id: 2, name: "Footwear" },
+  { id: 3, name: "Accessories" },
+  { id: 4, name: "Special" },
 ];
 
 const NewProductForm = () => {

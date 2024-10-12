@@ -1,4 +1,6 @@
 "use client";
+
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,40 +8,42 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import useProductStore from "@/utils/zustand";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import dynamic from "next/dynamic";
-
-const Confetti = dynamic(() => import("react-confetti"), { ssr: false });
+import confetti from "canvas-confetti"; // Import canvas-confetti
 
 const SuccessPageComponent = () => {
-  const {
-    resetCart,
-    addOrder,
-    error,
-    fetchCartItems,
-    calculateTotalPrice,
-  } = useProductStore();
+  const { resetCart, addOrder, error, fetchCartItems, calculateTotalPrice } =
+    useProductStore();
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
 
-  const sessionId = searchParams.get("session_id"); // Extract session ID from the URL
-
+  // Function to launch confetti
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ["#bb0000", "#ffffff", "#00ff00"],
+      shapes: ["circle", "square"],
+    });
+  };
 
   useEffect(() => {
+    // Trigger confetti when the order is successfully created
+    fireConfetti();
+    
     const fetchCartAndCreateOrder = async () => {
       if (isLoaded && user && sessionId) {
-        await fetchCartItems(user.id); // Fetch user's cart items
+        await fetchCartItems(user.id);
         const { cartItems: updatedCartItems } = useProductStore.getState();
 
         if (updatedCartItems.length > 0) {
           const total = calculateTotalPrice();
 
-          // Fix: Ensure total is a number before comparison
           if (typeof total === "number" && total > 0) {
             const status = "success";
             try {
-              // Directly call addOrder with sessionId and cartItems
               await addOrder(
                 user.id,
                 status,
@@ -77,12 +81,6 @@ const SuccessPageComponent = () => {
 
   return (
     <div className="container max-w-md mx-auto px-4 py-16">
-      <Confetti
-        width={1200}
-        height={400}
-        recycle={false}
-        numberOfPieces={200}
-      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -97,10 +95,7 @@ const SuccessPageComponent = () => {
               Your payment was successful and your order has been placed.
             </p>
             {error && <p className="text-red-500">{error}</p>}
-            <Button
-              className="w-full"
-              onClick={() => router.push("/order")}
-            >
+            <Button className="w-full" onClick={() => router.push("/order")}>
               <FileText className="mr-2 h-4 w-4" />
               View Order Details
             </Button>

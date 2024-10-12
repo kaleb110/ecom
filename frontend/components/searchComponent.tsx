@@ -16,10 +16,10 @@ import useProductStore from "@/utils/zustand";
 import { Product } from "@/types";
 
 const categories = [
-  { value: "all", label: "All" },
-  { value: "tech", label: "Tech" },
-  { value: "car", label: "Car" },
-  { value: "health", label: "Health" },
+  { value: "Apparel", label: "Apparel" },
+  { value: "Footwear", label: "Footwear" },
+  { value: "Accessories", label: "Accessories" },
+  { value: "Special", label: "Special" },
 ];
 
 const SearchComponent = () => {
