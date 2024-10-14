@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import confetti from "canvas-confetti"; // Import canvas-confetti
+import confetti from "canvas-confetti";
 
 const SuccessPageComponent = () => {
   const { resetCart, addOrder, error, fetchCartItems, calculateTotalPrice } =
@@ -17,9 +17,12 @@ const SuccessPageComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const confettiRef = useRef(false);
 
   // Function to launch confetti
   const fireConfetti = () => {
+    if (confettiRef.current) return; // If confetti has already been fired, don't fire again
+    confettiRef.current = true; // Set the ref to true to indicate confetti has been fired
     confetti({
       particleCount: 100,
       spread: 70,
@@ -30,10 +33,9 @@ const SuccessPageComponent = () => {
   };
 
   useEffect(() => {
-    // Trigger confetti when the order is successfully created
-    fireConfetti();
-    
     const fetchCartAndCreateOrder = async () => {
+      // Trigger confetti after the order is successfully created
+      fireConfetti();
       if (isLoaded && user && sessionId) {
         await fetchCartItems(user.id);
         const { cartItems: updatedCartItems } = useProductStore.getState();

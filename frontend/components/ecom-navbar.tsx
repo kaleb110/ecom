@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import { useUser } from "@clerk/nextjs";
 import { User } from "@/types";
 import Link from "next/link";

@@ -8,7 +8,8 @@ export const metadata: Metadata = {
 };
 import { SignedOut, SignedIn } from "@clerk/nextjs";
 import { LandingPageComponent } from "@/components/landing-page";
-
+import { Analytics } from "@vercel/analytics/react";
+import Head from "next/head";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -18,12 +19,16 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
+          <Head>
+            <link rel="icon" href="/favicon.ico" sizes="any" />
+          </Head>
           <SignedOut>
             <LandingPageComponent />
           </SignedOut>
           <SignedIn>
             <EcomNavbarComponent />
             {children}
+            <Analytics />
           </SignedIn>
         </body>
       </html>

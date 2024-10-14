@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import { Order, OrderItem } from "@/types";
 
 export default function Component() {

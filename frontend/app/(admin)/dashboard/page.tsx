@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PlusCircle, Package, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import NewProductForm from "@/app/addproduct/page";
+import NewProductForm from "@/app/(admin)/addproduct/page";
 import {
   Table,
   TableBody,
@@ -25,7 +25,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import ProductsPage from "../productlist/page";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";

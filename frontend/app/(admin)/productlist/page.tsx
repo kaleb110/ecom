@@ -18,12 +18,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import { Product } from "@/types";
 
 export default function ProductsPage() {
-  const { products, fetchProducts, deleteProduct } =
-    useProductStore();
+  const { products, fetchProducts, deleteProduct } = useProductStore();
 
   useEffect(() => {
     const fetchProductsFunc = async () => {
@@ -34,7 +33,7 @@ export default function ProductsPage() {
       }
     };
 
-    fetchProductsFunc()
+    fetchProductsFunc();
   }, [fetchProducts]);
 
   const handleEdit = (productId: number) => {

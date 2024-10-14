@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Check, X, Plus, Minus } from "lucide-react";
 import Image from "next/image";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,7 +82,6 @@ const ProductDetailsComponent = () => {
     </div>
   );
 
-
   if (isLoading || !productDetail) return <LoadingSkeleton />;
 
   const { name, description, price, stock, imageUrl, categories } =
@@ -103,7 +102,7 @@ const ProductDetailsComponent = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-[35%_55%] gap-4 items-start w-full">
           <div className="space-y-4 w-full pr-4">
-            <div className="relative overflow-hidden rounded-lg bg-gray-100  h-[70vh]">
+            <div className="relative overflow-hidden rounded-lg bg-gray-100 h-[40vh] sm:h-[70vh]">
               <Image
                 src={imageUrl || "/placeholder.svg"}
                 alt={name}

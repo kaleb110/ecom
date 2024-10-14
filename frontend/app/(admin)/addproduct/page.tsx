@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import useProductStore from "@/utils/zustand";
-import { UploadButton } from "@/utils/uploadthing";
+import useProductStore from "@/store/zustand";
+import { UploadButton } from "@/lib/uploadthing";
 import Image from "next/image";
 
 const formSchema = z.object({

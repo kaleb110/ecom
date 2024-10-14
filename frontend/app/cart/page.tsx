@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import useProductStore from "@/utils/zustand";
+import useProductStore from "@/store/zustand";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { CartItem } from "@/types";
