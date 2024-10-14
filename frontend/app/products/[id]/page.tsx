@@ -55,32 +55,36 @@ const ProductDetailsComponent = () => {
 
   if (error) return <p>{error}</p>;
 
-  const LoadingSkeleton = () => (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-[35%_55%] gap-4 items-start w-full">
-        <div className="space-y-4 w-full pr-4">
-          <Skeleton className="w-full h-[70vh] rounded-lg" />
+const LoadingSkeleton = () => (
+  <div className="container mx-auto px-4 py-8">
+    <div className="grid md:grid-cols-[35%_55%] gap-8 items-start w-full">
+      <div className="space-y-4 w-full">
+        <Skeleton className="w-full h-[40vh] sm:h-[70vh] rounded-lg" />
+      </div>
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-3/4" />
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-6 w-16" />
         </div>
-        <div className="space-y-4 pl-4">
-          <Skeleton className="h-8 w-3/4" />
-          <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-6 w-20" />
-            <Skeleton className="h-6 w-20" />
-            <Skeleton className="h-6 w-20" />
-          </div>
-          <Skeleton className="h-10 w-1/4" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-8 w-24" />
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-8 w-8" />
-            <Skeleton className="h-8 w-8" />
-            <Skeleton className="h-8 w-8" />
-          </div>
-          <Skeleton className="h-12 w-40" />
+        <Skeleton className="h-10 w-1/3" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
         </div>
+        <Skeleton className="h-8 w-24" />
+        <div className="flex items-center space-x-4">
+          <Skeleton className="h-10 w-10 rounded-md" />
+          <Skeleton className="h-10 w-16" />
+          <Skeleton className="h-10 w-10 rounded-md" />
+        </div>
+        <Skeleton className="h-12 w-full sm:w-48" />
       </div>
     </div>
-  );
+  </div>
+);
 
   if (isLoading || !productDetail) return <LoadingSkeleton />;
 
