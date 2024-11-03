@@ -11,7 +11,7 @@ export function LandingPageComponent() {
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
       <header className="container mx-auto px-4 py-8">
         <nav className="flex justify-between items-center">
-          <div className="text-2xl font-bold text-blue-600">ShopCom</div>
+          <div className="text-2xl font-bold text-blue-600">FetanGebeya</div>
         </nav>
       </header>
 
@@ -23,7 +23,7 @@ export function LandingPageComponent() {
             transition={{ duration: 0.5 }}
             className="text-4xl md:text-6xl font-bold mb-6"
           >
-            Welcome to ShopCom
+            Welcome to FetanGebeya
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: -20 }}
@@ -132,7 +132,7 @@ export function LandingPageComponent() {
             </ul>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-200 text-center">
-            <p>&copy; 2024 ShopCom. All rights reserved.</p>
+            <p>&copy; 2024 FetanGebeya. All rights reserved.</p>
           </div>
         </div>
       </footer>

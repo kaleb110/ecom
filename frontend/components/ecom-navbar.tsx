@@ -54,7 +54,7 @@ export function EcomNavbarComponent() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex-shrink-0 flex items-center">
-            <span className="text-xl font-bold text-primary">ShopCom</span>
+            <span className="text-xl font-bold text-primary">FetanGebeya</span>
           </Link>
 
           <div className="flex items-center justify-center gap-4">
