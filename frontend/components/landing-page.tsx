@@ -5,6 +5,7 @@ import { ShoppingBag, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignInButton } from "@clerk/nextjs";
+import Image from "next/image";
 
 export function LandingPageComponent() {
   return (
@@ -16,38 +17,49 @@ export function LandingPageComponent() {
       </header>
 
       <main className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl md:text-6xl font-bold mb-6"
-          >
-            Welcome to FetanGebeya
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl mb-8"
-          >
-            Your one-stop destination for hassle-free online shopping. Join us
-            today and experience the ease of modern e-commerce.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <SignInButton>
-              <Button size="lg">Sign In</Button>
-            </SignInButton>
-          </motion.div>
+        <div className="flex flex-col md:flex-row items-center mb-12">
+          <div className="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl md:text-6xl font-bold mb-6"
+            >
+              Welcome to FetanGebeya
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-xl mb-8"
+            >
+              Your one-stop destination for hassle-free online shopping based in ethiopia. Join us
+              today and experience the ease of modern e-commerce.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <SignInButton>
+                <Button size="lg">Sign In</Button>
+              </SignInButton>
+            </motion.div>
+          </div>
+          <div className="md:w-1/2">
+            <Image
+              src="https://utfs.io/f/EwD0sHYT6rXkjJDGHXzbeQ4AL2XZTUNyg9W7MkhVm08JfGiu"
+              alt="FetanGebeya Shopping Experience"
+              width={600}
+              height={400}
+              className="rounded-lg shadow-lg"
+            />
+          </div>
         </div>
 
         <section className="mt-24">
           <h2 className="text-3xl font-bold text-center mb-12">
-            Why Choose ShopEase?
+            Why Choose FetanGebeya?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
@@ -97,8 +109,8 @@ export function LandingPageComponent() {
               Ready to Start Shopping?
             </h2>
             <p className="text-xl mb-8">
-              Join thousands of satisfied customers and experience the ShopEase
-              difference today.
+              Join thousands of satisfied customers and experience the
+              FetanGebeya difference today.
             </p>
             <SignInButton>
               <Button size="lg" variant="secondary">
