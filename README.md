@@ -138,7 +138,7 @@ Contributions are welcome! Here's how you can help:
 
 If you have any questions, feel free to reach out:
 
-- **Your Name**: [kalisha123k.com](mailto:kalisha123k@gmail.com)
+- **Kaleb**: [kalisha123k.com](mailto:kalisha123k@gmail.com)
 - [GitHub Issues](https://github.com/kaleb110/ecom/issues)
 
 ---
